@@ -26,7 +26,6 @@ module.exports = configure(function (ctx) {
       'quasar-notify',
       'load-base-components',
       'vue-i18n',
-      'vue-socket-io',
       'vue-observe-visibility',
       'v-click-outside',
       'sentry',
