@@ -121,9 +121,9 @@ module.exports = configure(function (ctx) {
       },
 
       manifest: {
-        name: 'Instagram Clone',
-        short_name: 'Instagram Clone',
-        description: 'Instagram Clone with Quasar & Nest',
+        name: 'Audio Cutter',
+        short_name: 'Audio Cutter',
+        description: 'Audio Cutter with Quasar & Nest',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
