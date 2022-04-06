@@ -1,5 +1,7 @@
 # Audio cutter with Vue 3 and Nest
 
+prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_instagram-clone)
+
 ### Content
 - [Video](#video)
 - [Project structure](#project-structure)
