@@ -3,19 +3,6 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { UserModule } from './modules/user/user.module';
-import { NotificationsModule } from './modules/notifications/notifications.module';
-
-import { AuthModule } from './modules/auth/auth.module';
-import { JwtAuthGuard } from './modules/auth/guard/jwt-auth.guard';
-
-import { ScheduleModule } from '@nestjs/schedule';
-import { EmailScheduleModule } from './modules/email-schedule/email-schedule.module';
-import { EmailVerificationModule } from './modules/email-verification/email-verification.module';
-
-import { EmailModule } from './services/email/email.module';
-import { TwoFactorAuthModule } from './modules/two-factor-auth/two-factor-auth.module';
-import { PostsModule } from './modules/posts/posts.module';
 import { RavenInterceptor, RavenModule } from 'nest-raven';
 
 @Global()
@@ -35,26 +22,9 @@ import { RavenInterceptor, RavenModule } from 'nest-raven';
       synchronize: true,
     }),
     RavenModule,
-
-    PostsModule,
-
-    UserModule,
-    NotificationsModule,
-    AuthModule,
-
-    ScheduleModule.forRoot(),
-    EmailScheduleModule,
-
-    EmailModule,
-    EmailVerificationModule,
-    TwoFactorAuthModule,
   ],
   controllers: [],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
     {
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
