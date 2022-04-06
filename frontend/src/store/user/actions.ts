@@ -1,8 +1,18 @@
 import { ActionTree } from 'vuex';
 import { StateInterface } from '../index';
 import { UserStateInterface } from 'src/store/user/state';
-import { UserAuthResponse, UserLoginDTO, UserRegisterDTO, UserUpdateTokenResponse } from 'src/models/user/user.model';
+import {
+  UserAuthResponse,
+  UserDTO,
+  UserLoginDTO,
+  UserModel,
+  UserRegisterDTO,
+  UserSuggestionModel,
+  UserUpdateTokenResponse,
+} from 'src/models/user/user.model';
 import authRepository from 'src/repositories/authRepository';
+import userRepository from 'src/repositories/userRepository';
+import { Cookies, Notify } from 'quasar';
 
 const actions: ActionTree<UserStateInterface, StateInterface> = {
   async login({ commit }, payload: UserLoginDTO): Promise<UserAuthResponse> {
@@ -25,6 +35,20 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
     return;
   },
 
+  async update({ commit }, { id, payload }: { id: number; payload: UserDTO }) {
+    const data = await userRepository.update(id, payload);
+    commit('UPDATE_USER', data);
+  },
+  async updateAvatar({ commit }, file) {
+    const avatar = await userRepository.uploadAvatar(file);
+    Notify.create({
+      type: 'positive',
+      message: 'Avatar updated',
+    });
+    commit('UPDATE_USER', { avatar });
+    return avatar;
+  },
+
   async authWithGoogle({ commit }, token) {
     const data = await authRepository.authWithGoogle(token);
     commit('AUTH_USER', data);
@@ -38,18 +62,41 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
     const user = await authRepository.getSelf();
     if (user) commit('AUTH_USER', { user, accessToken, refreshToken });
   },
-  async updateTokens({ state, commit }) {
-    if (!state.refreshToken || !state.currentUser) return;
+  async updateTokens({ commit }) {
+    const { id, email, refreshToken }: UserModel = Cookies.get('user');
+    if (!id || !email || !refreshToken) return;
 
     const payload = {
-      userID: state.currentUser.id,
-      email: state.currentUser.email,
-      refreshToken: state.refreshToken,
+      userID: id,
+      email,
+      refreshToken,
     };
     const tokens = await authRepository.updateTokens(payload);
     commit('UPDATE_TOKENS', tokens);
 
     return tokens;
+  },
+
+  async follow({ commit }, id: number) {
+    await userRepository.follow(id);
+    Notify.create({
+      type: 'positive',
+      message: 'Successfully followed',
+    });
+    commit('post/TOGGLE_FOLLOW', id, { root: true });
+  },
+  async unfollow({ commit }, id: number) {
+    await userRepository.unfollow(id);
+    Notify.create({
+      type: 'positive',
+      message: 'Successfully unfollowed',
+    });
+    commit('post/TOGGLE_FOLLOW', id, { root: true });
+  },
+
+  async getSuggestions({ commit }) {
+    const data: UserSuggestionModel[] = await userRepository.getSuggestions();
+    commit('SET_SUGGESTIONS', data);
   },
 };
 

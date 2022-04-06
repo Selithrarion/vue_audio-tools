@@ -1,29 +1,10 @@
 <template>
-  <BaseButton icon="notifications" :tooltip="t('notification.notifications')" unelevated dense round>
-    <q-menu style="height: calc(100vh - 100px)" auto-close>
+  <BaseButton icon="favorite" size="18px" :tooltip="t('notification.notifications')" unelevated dense round>
+    <BaseMenu style="height: 360px" :offset="[0, 16]">
       <q-list class="layout-notifications">
-        <div class="column sticky-position bg-white">
-          <div class="flex-center-between gap-2 q-pa-md">
-            <h5 class="q-ma-none full-width">
-              {{ t('notification.notifications') }}
-            </h5>
-            <q-toggle
-              v-model="isShowOnlyUnread"
-              class="flex-shrink-0"
-              checked-icon="check"
-              unchecked-icon="clear"
-              color="green"
-              :label="t('notification.showUnread')"
-              left-label
-            />
-          </div>
-          <q-separator />
-        </div>
-
         <BaseLoader v-if="loading.active.value" center />
 
         <div v-else-if="!filteredNotifications.length" class="layout-notifications__empty">
-          <div class="layout-notifications__empty-image" />
           <div v-if="isShowOnlyUnread">
             {{ t('notification.noUnreadLast30Days') }}
           </div>
@@ -34,59 +15,58 @@
 
         <template v-else>
           <div class="layout-notifications__section-header flex-center-between q-py-sm q-pl-md q-px-lg">
-            <CommonListTitle class="text-weight-medium" :title="t('date.today')" />
-            <BaseButton v-show="canReadAll" class="text-weight-medium text-caption" plain-style @click="readAll">
-              {{ t('notification.markAllRead') }}
-            </BaseButton>
+            <CommonListTitle class="text-weight-medium" title="Recent" />
           </div>
-          <BaseItem v-for="item in filteredNotifications" :key="item.id" @click="handleItemClick(item)">
-            <q-item-section>
-              <q-item-label class="row gap-3">
-                {{ getNotificationTitleByType(item.type) }}
-                <span class="text-blue-grey-5">
-                  {{ formatDate(item.createdAt, DateTypes.DIFF) }}
+          <div class="layout-notifications__section-content">
+            <CommonUser
+              v-for="notification in filteredNotifications"
+              :key="notification.id"
+              :user="notification.initiatorUser"
+              hide-name
+              @click="handleItemClick(notification)"
+            >
+              <template #username="{ username }">
+                <b>{{ username }}</b>
+                {{ getNotificationTitleByType(notification.type) }}
+                <span class="text-blue-grey-4 text-caption q-pl-xs">
+                  {{ formatDate(notification.createdAt, DateTypes.DIFF) }}
                 </span>
-              </q-item-label>
-            </q-item-section>
-            <div>
-              <BaseButton
-                padding="12px"
-                icon="circle"
-                size="6px"
-                :color="item.read ? 'blue-grey-3' : 'primary'"
-                round
-                flat
-                @click.stop="toggleNotificationRead(item.id)"
-              >
-                <BaseTooltip delay="0" :label="item.read ? t('notification.markUnread') : t('notification.markRead')" />
-              </BaseButton>
-            </div>
-          </BaseItem>
+              </template>
+
+              <template #append>
+                <BaseAvatar :src="notification.post?.fileURL" size="40px" square />
+              </template>
+            </CommonUser>
+          </div>
         </template>
       </q-list>
-    </q-menu>
+    </BaseMenu>
   </BaseButton>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, onBeforeMount, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useFormat, DateTypes } from 'src/composables/format/useFormat';
+import { DateTypes, useFormat } from 'src/composables/format/useFormat';
 import useLoading from 'src/composables/common/useLoading';
 
-import notificationRepository from 'src/repositories/notificationRepository';
-import { NotificationModel } from 'src/models/user/notification.model';
-
 import CommonListTitle from 'components/common/CommonListTitle.vue';
+import CommonUser from 'components/common/CommonUser.vue';
+
+import notificationRepository from 'src/repositories/notificationRepository';
+import { NotificationModel, NotificationTypes } from 'src/models/user/notification.model';
 
 export default defineComponent({
   name: 'LayoutNotifications',
 
   components: {
     CommonListTitle,
+    CommonUser,
   },
 
   setup() {
+    const router = useRouter();
     const { t } = useI18n();
     const { formatDate } = useFormat();
     const loading = useLoading({ default: true });
@@ -127,7 +107,14 @@ export default defineComponent({
     }
 
     function handleItemClick(item: NotificationModel) {
-      console.log(item);
+      const isPostActivity =
+        item.type === NotificationTypes.LIKED_PHOTO ||
+        item.type === NotificationTypes.LIKED_VIDEO ||
+        item.type === NotificationTypes.LIKED_COMMENT;
+      const isUserActivity = item.type === NotificationTypes.FOLLOWED;
+
+      if (isPostActivity) void router.push(`/post/${item.post.id}`);
+      else if (isUserActivity) void router.push(`/profile/${item.initiatorUser.username}`);
     }
 
     return {
@@ -155,13 +142,17 @@ export default defineComponent({
 <style lang="scss" scoped>
 .layout-notifications {
   position: relative;
-  width: 540px;
-  height: calc(100vh - 100px);
+  width: 500px;
 
   &__section-header {
     position: sticky;
-    top: 73px;
+    top: 0;
     background-color: white;
+    z-index: 1;
+  }
+  &__section-content {
+    position: sticky;
+    top: 36px;
     z-index: 1;
   }
 
@@ -170,7 +161,7 @@ export default defineComponent({
     flex-flow: column;
     align-items: center;
     gap: 16px;
-    padding-top: 16px;
+    padding-top: 64px;
   }
   &__empty-image {
     background: url('src/assets/svg/empty-list.svg') center no-repeat;

@@ -9,6 +9,14 @@
 .rounded-full
   border-radius: 100%
 
+.z-10
+  z-index: 10
+.z-20
+  z-index: 20
+.z-30
+  z-index: 30
+
+
 .flex-shrink-0
   flex-shrink: 0
 .flex-shrink-1
@@ -38,6 +46,13 @@
   align-items: center
   justify-content: flex-end
 
+.break-word
+  word-break: break-word
+
+.w-66
+  width: 66%
+.w-33
+  width: 33%
 .w-half
   width: 50%
 .w-fit-content
@@ -71,6 +86,10 @@
   gap: 24px
 .gap-7
   gap: 28px
+.gap-8
+  gap: 32px
+.gap-16
+  gap: 64px
 
 .hover-shadow-sm
   transition: box-shadow 150ms ease, transform 150ms ease
@@ -96,3 +115,36 @@
   position: sticky
   top: 0
   z-index: 1
+
+.container,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl
+  width: 100%
+  margin-right: auto
+  margin-left: auto
+@media (min-width: $breakpoint-xs-min)
+.container,
+.container-sm
+  max-width: 540px
+@media (min-width: $breakpoint-sm-min)
+.container,
+.container-sm,
+.container-md
+  max-width: 920px
+@media (min-width: $breakpoint-md-min)
+.container,
+.container-sm,
+.container-md,
+.container-lg
+  max-width: 975px
+@media (min-width: $breakpoint-lg-min)
+.container,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl
+  max-width: 975px
+
+

@@ -1,14 +1,10 @@
-import { ClassSerializerInterceptor, Global, HttpException, HttpStatus, Module } from '@nestjs/common';
+import { ClassSerializerInterceptor, Global, HttpException, Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { ProjectsModule } from './modules/projects/projects.module';
 import { UserModule } from './modules/user/user.module';
-import { TeamModule } from './modules/teams/team.module';
-import { BoardsModule } from './modules/boards/boards.module';
-import { ColumnsModule } from './modules/columns/columns.module';
-import { IssuesModule } from './modules/issues/issues.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guard/jwt-auth.guard';
@@ -17,9 +13,10 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EmailScheduleModule } from './modules/email-schedule/email-schedule.module';
 import { EmailVerificationModule } from './modules/email-verification/email-verification.module';
 
-import { SearchModule } from './services/search/search.module';
 import { EmailModule } from './services/email/email.module';
 import { TwoFactorAuthModule } from './modules/two-factor-auth/two-factor-auth.module';
+import { PostsModule } from './modules/posts/posts.module';
+import { RavenInterceptor, RavenModule } from 'nest-raven';
 
 @Global()
 @Module({
@@ -37,19 +34,17 @@ import { TwoFactorAuthModule } from './modules/two-factor-auth/two-factor-auth.m
       entities: ['dist/**/entity/*.entity{.ts,.js}'],
       synchronize: true,
     }),
+    RavenModule,
 
-    ProjectsModule,
+    PostsModule,
+
     UserModule,
-    TeamModule,
-    BoardsModule,
-    ColumnsModule,
-    IssuesModule,
+    NotificationsModule,
     AuthModule,
 
     ScheduleModule.forRoot(),
     EmailScheduleModule,
 
-    SearchModule,
     EmailModule,
     EmailVerificationModule,
     TwoFactorAuthModule,
@@ -63,6 +58,12 @@ import { TwoFactorAuthModule } from './modules/two-factor-auth/two-factor-auth.m
     {
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useValue: new RavenInterceptor({
+        filters: [{ type: HttpException, filter: (e: HttpException) => 500 > e.getStatus() }],
+      }),
     },
   ],
 })

@@ -1,11 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { NotificationEntity, NotificationTypes } from './entity/notification.entity';
+import { NotificationEntity } from './entity/notification.entity';
+import { CreateNotificationDTO, UpdateNotificationDTO } from './dto';
+
 import { UserService } from '../user/user.service';
-import { UserEntity } from '../user/entity/user.entity';
-import { UpdateNotificationDTO } from './dto/notification.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -13,7 +13,7 @@ export class NotificationsService {
     @InjectRepository(NotificationEntity)
     private notifications: Repository<NotificationEntity>,
 
-    @Inject(UserService)
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService
   ) {}
 
@@ -21,8 +21,17 @@ export class NotificationsService {
     return this.userService.getNotifications(userID);
   }
 
-  async create(type: NotificationTypes, user: UserEntity): Promise<NotificationEntity> {
-    const item = this.notifications.create({ type, user });
+  async create(payload: CreateNotificationDTO): Promise<NotificationEntity> {
+    const isSameUserAndNotNeedNotification = payload.receiverUserID === payload.initiatorUserID;
+    if (isSameUserAndNotNeedNotification) return;
+
+    const item = this.notifications.create({
+      type: payload.type,
+      receiverUser: { id: payload.receiverUserID },
+      initiatorUser: { id: payload.initiatorUserID },
+      post: payload.postID ? { id: payload.postID } : null,
+      comment: payload.commentID ? { id: payload.commentID } : null,
+    });
     return await this.notifications.save(item);
   }
 
@@ -39,5 +48,26 @@ export class NotificationsService {
 
   async deleteByID(id: number): Promise<void> {
     await this.notifications.delete(id);
+  }
+
+  async deleteByPostID(postID: number, currentUserID: number): Promise<void> {
+    const notification = await this.notifications
+      .createQueryBuilder('notification')
+      .where('notification.post.id = :postID', { postID })
+      .andWhere('notification.initiatorUser.id = :currentUserID', { currentUserID })
+      .getOne();
+    if (notification) await this.notifications.delete(notification.id);
+  }
+
+  async deleteLastByInitiatorID(initiatorID: number, receiverID): Promise<void> {
+    const notificationArray = await this.notifications
+      .createQueryBuilder('notification')
+      .where('notification.receiverUser.id = :receiverID', { receiverID })
+      .where('notification.initiatorUser.id = :initiatorID', { initiatorID })
+      .orderBy('notification.createdAt', 'DESC')
+      .take(1)
+      .getMany();
+    const notification = notificationArray?.[0];
+    if (notification) await this.notifications.delete(notification.id);
   }
 }

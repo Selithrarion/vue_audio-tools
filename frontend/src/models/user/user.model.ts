@@ -1,15 +1,17 @@
 import { BaseModel } from 'src/models/common/base.model';
-import { IssueModel } from 'src/models/project/issue.model';
-import { PublicFileModel } from '../common/public.file.model';
-import { TeamModel } from 'src/models/user/team.model';
-import { ProjectModel } from 'src/models/project/project.model';
+import { PublicFileModel } from 'src/models/common/public-file.model';
+import { PostModel } from 'src/models/feed/post.model';
 
 export interface UserModel extends BaseModel {
   name: string;
   username: string;
   password: string;
   email: string;
-  locale: string;
+
+  description: string;
+  website: string;
+  gender: string;
+  phone: string;
 
   isActive: boolean;
   isEmailConfirmed: boolean;
@@ -18,22 +20,15 @@ export interface UserModel extends BaseModel {
 
   color: string;
   avatar: PublicFileModel | null;
-  header: PublicFileModel | null;
 
-  assignedIssues?: IssueModel[];
-  watchingIssues?: IssueModel[];
+  posts?: PostModel[];
+  postsNumber?: number;
 
-  projects?: ProjectModel[];
-  projectsIDs: number[];
-  favoriteProjectsIDs: number[];
-  teams?: TeamModel[];
-  teamsLeader?: TeamModel[];
-  teamsLeaderIDs: number[];
+  isViewerFollowed?: boolean;
+  isViewerBlocked?: boolean;
 
-  position: string;
-  department: string;
-  organisation: string;
-  location: string;
+  followersNumber?: number;
+  followedNumber?: number;
 
   accessToken?: string;
   refreshToken?: string;
@@ -42,12 +37,21 @@ export interface UserModel extends BaseModel {
 export interface UserDTO {
   username?: string;
   name?: string;
+  email?: string;
   avatar?: PublicFileModel;
-  header?: PublicFileModel;
-  position?: string;
-  department?: string;
-  organisation?: string;
-  location?: string;
+
+  description?: string;
+  website?: string;
+  phone?: string;
+  gender?: string;
+}
+
+export interface UserSuggestionModel {
+  id: number;
+  color: string;
+  avatar?: PublicFileModel | null;
+  username: string;
+  suggestion: string;
 }
 
 export interface UserLoginDTO {
@@ -65,10 +69,7 @@ export interface UserAuthResponse {
   accessToken: string;
   refreshToken: string;
 }
-export interface UserUpdateTokenResponse {
-  accessToken: string;
-  refreshToken: string;
-}
+export interface UserUpdateTokenResponse extends UserAuthResponse {}
 export interface UserUpdateTokenDTO {
   userID: number;
   refreshToken: string;

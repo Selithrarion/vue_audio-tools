@@ -39,150 +39,29 @@ export default {
     search: 'Search',
   },
 
-  work: {
-    title: 'Your work',
-    recent: 'Recent projects',
-    all: 'All projects',
-    open: 'Open projects page',
-    openProject: 'Open project',
-    noProjects: 'No projects',
-    boards: '0 boards | {n} board | {n} boards',
-  },
-
-  email: {
-    confirmation: 'Email confirmation',
-    confirmSuccess: 'You successfully confirmed Email',
-    confirmResend: 'Mail was sent on your email',
-    confirmError:
-      'Something went wrong and the email was not confirmed. Perhaps the confirmation link has expired or the Email has already been confirmed',
-    resend: 'Resend',
-  },
-
-  project: {
-    project: 'Project',
-    projects: 'Projects',
-
-    kanbanDescription: 'Get a visual idea of working on a project thanks to simple tips and a functional whiteboard.',
-    scrumDescription: 'Achieve your goals faster with a modern whiteboard and backlog.',
-    companyManage: 'Software managed by the company',
-    teamManage: 'Software managed by the team',
-
-    chooseType: 'Choose project type',
-    create: 'Create project',
-    delete: 'This project and its configuration will be permanently deleted.',
-    settings: 'Project settings',
-    trash: 'Move to trash',
-
-    board: 'Board',
-    softwareDevProject: 'Software Development Project',
-    companyType: 'This is a project managed by a company',
-
-    automation: 'Automation',
-    markBoard: 'Mark board',
-    newVersion: 'New version',
-    enterNameTeamOrEmail: 'Enter name, team or email',
-    enterMessage: 'Enter message',
-    copyLink: 'Copy link',
-    onlyMyTasks: 'Only my tasks',
-    release: 'Release',
-
-    noCurrentIssues: 'No visible current tasks',
-    createIssue: 'Create issue',
-    orCheck: 'or check',
-    boardSettings: 'board settings',
-    importIssues: 'Import issues',
-    configureFields: 'Configure fields',
-
-    assigned: 'Assigned',
-    marks: 'Marks',
-    addMarks: 'Add marks',
-    assignToMe: 'Assign to me',
-    changeIssueType: 'change issue type',
-    editAssigned: 'Edit assigned',
-    author: 'Author',
-    editAuthor: 'Edit author',
-    openSettings: 'Open settings dialog',
-    configure: 'Configure',
-    deleteComment: 'Delete comment?',
-    deleteCommentFrom: 'Delete comment from {name}',
-
-    issueType: {
-      issueType: 'Issue type',
-      bug: 'Bug',
-      task: 'Task',
-      history: 'History',
-      investigation: 'Investigation',
-    },
-    issuePriority: {
-      priority: 'Priority',
-      edit: 'Edit priority',
-      lowest: 'Lowest',
-      low: 'Low',
-      medium: 'Medium',
-      high: 'High',
-      urgent: 'Urgent',
-    },
-  },
-
-  access: {
-    access: 'Access',
-    private: 'Private',
-    privateDescription:
-      'Только администраторы и пользователи, добавленные в проект, могут выполнять поиск, создавать и редактировать его задачи.',
-    limited: 'Limited',
-    limitedDescription:
-      'Любой пользователь может выполнять поиск, просматривать и комментировать. Только пользователи, добавленные в проект, могут создавать и редактировать его задачи.',
-    opened: 'Opened',
-    openedDescription:
-      'Любой пользователь может выполнять поиск, просматривать, комментировать, создавать и редактировать задачи.',
-  },
-
-  people: {
-    membersNoCount: 'members',
-    members: '0 members | {n} member | {n} members',
-    yourNewTeam: 'Your new team!',
-    createTeam: 'Create new team',
-    addTeamMembers: 'Add team members',
-    deleteTeam: 'Delete team?',
-    deleteTeamText: 'Delete team <span class="text-weight-bold"> {name} </span> with {number} members?',
-    activityAccess: 'Other users will only see the objects they have access to.',
-    activityYourLast: 'It shows all the objects that you have created, changed or commented on in the last 90 days.',
-    activityUserLast:
-      'It shows all the objects that the user has created, changed or commented on in the last 90 days.',
-    activityTeamLast:
-      'It shows all the objects that the team has created, changed or commented on in the last 90 days.',
-    manageAccount: 'Manage account',
-
-    info: 'info',
-    contactInfo: 'contact info',
-    yourPosition: 'Your position',
-    position: 'Position',
-    yourDepartment: 'Your department',
-    department: 'Department',
-    yourOrganisation: 'Your oOrganisation',
-    organisation: 'Organisation',
-    yourLocation: 'Your location',
-    location: 'Location',
+  post: {
+    posts: 'posts | post | posts',
   },
 
   user: {
-    displayName: 'Display name',
+    displayName: 'Name and surname',
     username: 'Username',
     email: 'Email',
     password: 'Password',
     confirmPassword: 'Confirm password',
     profile: 'Profile',
-    displayNameUsernameOrEmail: 'Their display name, username or email',
+    displayNameUsernameOrEmail: 'Their name, surname, username or email',
     max10Users: 'You can invite no more than 10 users at a time.',
+    followers: 'followers | follower | followers',
+    followings: 'following | following | followings',
   },
 
   auth: {
     register: 'Register',
-    registerJiraAccount: 'Create new Jira account',
+    registerAccount: 'Sign up to see photos and videos from your friends.',
     resetPassword: 'Reset password',
     signIn: 'Sign in',
     signOut: 'Sign out',
-    signInJira: 'Sign in Jira',
     scanQrCode: 'Scan the QR code using the Google Authenticator app and enter the code in the field below',
     enter2FaCode: 'Enter the code from the Google Authenticator app',
     incorrect2FaCode: 'Invalid code, try again',
@@ -222,18 +101,19 @@ export default {
     markUnread: 'Mark as unread',
 
     typeTitles: {
-      news: 'News on the Jira app',
-      issueAssign: 'You have been assigned a task',
-      issueWatchUpdate: 'The observed task has been updated',
+      likedPhoto: 'liked your photo',
+      likedVideo: 'liked your video',
+      likedComment: 'liked your comment',
+      followed: 'started following you',
     },
   },
 
   date: {
-    secondsAgo: '0 секунд назад | {n} секунду назад | {n} секунды назад | {n} секунд назад',
-    minutesAgo: '0 минут назад | {n} минуту назад | {n} минуты назад | {n} минут назад',
-    hoursAgo: '0 час назад | {n} час назад | {n} часа назад | {n} часов назад',
-    daysAgo: '0 день назад| {n} день назад | {n} дня назад | {n} дней назад',
-    monthsAgo: '0 месяц назад | {n} месяц назад | {n} месяца назад | {n} месяцев назад',
+    secondsAgo: '0 seconds ago | {n} second ago | {n} seconds ago',
+    minutesAgo: '0 minutes ago | {n} minute ago | {n} minutes ago',
+    hoursAgo: '0 hours ago | {n} hour ago | {n} hours ago',
+    daysAgo: '0 days ago| {n} day ago | {n} days ago',
+    monthsAgo: '0 months ago | {n} month ago | {n} months ago',
 
     today: 'Today',
     yesterday: 'Yesterday',

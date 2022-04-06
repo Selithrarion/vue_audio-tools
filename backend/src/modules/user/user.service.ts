@@ -1,37 +1,41 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import { FindOneOptions, Not, Repository } from 'typeorm';
 
 import { CreateUserDTO } from './dto';
-import { UserEntity } from './entity/user.entity';
-import { ProjectEntity } from '../projects/entity/project.entity';
-import { BoardEntity } from '../boards/entity/board.entity';
+import { UserEntity, UserSuggestion } from './entity/user.entity';
 
-import * as sharp from 'sharp';
-import { v4 as uuidv4 } from 'uuid';
-import { extname } from 'path';
 import { FilesService } from '../files/files.service';
 import { PublicFileEntity } from '../files/entity/public-file.entity';
-import { UserSearchService } from './user-search.service';
-import { CreateUserGithubDTO } from './dto/create-user-github.dto';
-import { NotificationEntity } from '../notifications/entity/notification.entity';
+import { CreateUserGithubDTO } from './dto';
+import { NotificationEntity, NotificationTypes } from '../notifications/entity/notification.entity';
+import { FollowingEntity } from './entity/following.entity';
+import { CommentEntity } from '../posts/entity/comment.entity';
+import { PostsService } from '../posts/posts.service';
+import { RecentSearchEntity } from './entity/recentSearch.entity';
+import { TagEntity } from '../posts/entity/tag.entity';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly users: Repository<UserEntity>,
-
-    @Inject(UserSearchService)
-    private readonly userSearchService: UserSearchService,
+    @InjectRepository(FollowingEntity)
+    private readonly userFollowings: Repository<FollowingEntity>,
+    @InjectRepository(RecentSearchEntity)
+    private readonly recentSearch: Repository<RecentSearchEntity>,
 
     @Inject(FilesService)
-    private readonly filesService: FilesService
+    private readonly filesService: FilesService,
+    @Inject(forwardRef(() => PostsService))
+    private readonly postsService: PostsService,
+    @Inject(forwardRef(() => NotificationsService))
+    private readonly notificationsService: NotificationsService
   ) {}
 
-  async get(searchText: string, currentUserID: number): Promise<UserEntity[]> {
-    if (!searchText.length)
+  async getAll(search: string, currentUserID: number): Promise<UserEntity[]> {
+    if (!search.length)
       return this.users.find({
         where: {
           id: Not(currentUserID),
@@ -39,32 +43,51 @@ export class UserService {
         take: 10,
       });
 
-    const searchResult = await this.userSearchService.search(searchText);
-    const userIDs = searchResult.map((result) => result.id);
-    const filteredUserIDs = userIDs.filter((id) => id !== currentUserID);
-    if (!filteredUserIDs.length) return [];
-    return this.users.find({
-      where: { id: In(filteredUserIDs) },
-    });
+    const searchResult = await this.users
+      .createQueryBuilder()
+      .select()
+      .where('username ILIKE :search', { search: `%${search}%` })
+      .orWhere('name ILIKE :search', { search: `%${search}%` })
+      .orWhere('email ILIKE :search', { search: `%${search}%` })
+      .getMany();
+    const currentUserIndexInSearchResult = searchResult.findIndex((u) => u.id === currentUserID);
+    if (currentUserIndexInSearchResult !== -1) searchResult.splice(currentUserIndexInSearchResult, 1);
+
+    return searchResult;
   }
 
   async getByEmail(email: string): Promise<UserEntity> {
     return await this.users.findOne({ where: { email } });
   }
-  async getByID(id: number): Promise<UserEntity> {
-    return await this.users.findOne(id);
+  async getByID(id: number, options: FindOneOptions<UserEntity> = {}): Promise<UserEntity> {
+    return await this.users.findOne(id, options);
   }
-  async getProfileByID(id: number): Promise<UserEntity> {
-    return await this.users.findOne(id, {
-      relations: [
-        'assignedIssues',
-        'watchingIssues',
-        'favoriteProjects',
-        'favoriteProjects.users',
-        'teams',
-        'teamsLeader',
-      ],
-    });
+  async getProfileByUsername(username: string, currentUserID: number): Promise<UserEntity> {
+    const user = await this.users
+      .createQueryBuilder('user')
+      .where('user.username = :username', { username })
+      .leftJoinAndSelect('user.avatar', 'avatar')
+      .leftJoinAndSelect('user.posts', 'posts')
+      .leftJoinAndSelect('posts.file', 'file')
+      .leftJoinAndSelect('posts.tags', 'tags')
+      .leftJoinAndSelect('posts.likes', 'likes')
+      .orderBy('posts.createdAt', 'DESC')
+      .getOneOrFail();
+
+    const formattedPosts = await Promise.all(
+      user.posts.map(async (p) => {
+        return {
+          ...p,
+          isViewerLiked: await this.postsService.getIsUserLikedPost(user, p),
+        };
+      })
+    );
+    return {
+      ...user,
+      isViewerFollowed: await this.getIsUserFollowed(user.id, currentUserID),
+      isViewerBlocked: false,
+      posts: formattedPosts,
+    } as unknown as UserEntity;
   }
 
   async create(payload: CreateUserDTO): Promise<UserEntity> {
@@ -72,10 +95,7 @@ export class UserService {
     if (isUserAlreadyExist) throw new HttpException('USER_ALREADY_EXIST', HttpStatus.BAD_REQUEST);
 
     const user = await this.users.create(payload);
-    const createdUser = await this.users.save(user);
-
-    await this.userSearchService.indexUser(user);
-    return createdUser;
+    return await this.users.save(user);
   }
   async createWithGoogle(email: string): Promise<UserEntity> {
     // TODO: need to get google username and name
@@ -88,7 +108,6 @@ export class UserService {
       isGoogleAccount: true,
       isEmailConfirmed: true,
     });
-    await this.userSearchService.indexUser(user);
     return this.users.save(user);
   }
   async createWithGithub(payload: CreateUserGithubDTO): Promise<UserEntity> {
@@ -98,74 +117,57 @@ export class UserService {
       isGithubAccount: true,
       isEmailConfirmed: true,
     });
-    await this.userSearchService.indexUser(user);
     return this.users.save(user);
   }
 
   async update(id: number, payload: Partial<UserEntity>): Promise<UserEntity> {
     const toUpdate = await this.users.findOneOrFail(id);
     const user = this.users.create({ ...toUpdate, ...payload });
-    const updated = await this.users.save(user);
-
-    await this.userSearchService.update(user);
-    return updated;
+    return await this.users.save(user);
   }
 
   async delete(id: number): Promise<void> {
     await this.users.delete(id);
-    await this.userSearchService.remove(id);
   }
 
-  // TODO: refactor (code duplication in team.service)
-  async setUserImage(file: Express.Multer.File, field: 'avatar' | 'header', id: number): Promise<PublicFileEntity> {
-    const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    const validImageSize = 1024 * 1024 * 20;
-    const isInvalidType = !validImageTypes.includes(file.mimetype);
-
-    if (isInvalidType) throw new HttpException('INVALID_FILE_TYPE', HttpStatus.UNPROCESSABLE_ENTITY);
-    if (validImageSize < file.size) throw new HttpException('INVALID_FILE_SIZE', HttpStatus.UNPROCESSABLE_ENTITY);
-
-    const quality = field === 'avatar' ? 5 : 20;
-    const fileBuffer = await sharp(file.buffer).webp({ quality }).toBuffer();
-    const filename = uuidv4() + extname(file.originalname);
-
+  async setUserImage(file: Express.Multer.File, field: 'avatar', id: number): Promise<PublicFileEntity> {
     const user = await this.users.findOneOrFail(id);
     const isAlreadyHaveFieldImage = Boolean(user[field]);
 
     if (isAlreadyHaveFieldImage) {
-      const updatedUser = await this.users.save({
+      await this.users.save({
         ...user,
         [field]: null,
       });
       await this.filesService.deletePublicFile(user[field].id);
-      await this.userSearchService.update(updatedUser);
     }
-
-    const uploadedFile = await this.filesService.uploadPublicFile(fileBuffer, filename);
-    const updatedUser = await this.users.save({
+    const uploadedFile = await this.filesService.uploadPublicFile({
+      file,
+      quality: field === 'avatar' ? 5 : 20,
+      imageMaxSizeMB: 20,
+      type: 'image',
+    });
+    await this.users.save({
       ...user,
       [field]: uploadedFile,
     });
-    await this.userSearchService.update(updatedUser);
 
     return uploadedFile;
   }
 
-  async deleteUserImage(field: 'avatar' | 'header', id: number): Promise<void> {
+  async deleteUserImage(field: 'avatar', id: number): Promise<void> {
     const user = await this.users.findOneOrFail(id);
     const fileID = user[field]?.id;
     if (fileID) {
-      const updatedUser = await this.users.save({
+      await this.users.save({
         ...user,
         [field]: null,
       });
       await this.filesService.deletePublicFile(fileID);
-      await this.userSearchService.update(updatedUser);
     }
   }
 
-  async setRefreshToken(id: number, refreshToken: string): Promise<void> {
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+  async setHashedRefreshToken(id: number, hashedRefreshToken: string): Promise<void> {
     await this.users.update(id, {
       hashedRefreshToken,
     });
@@ -184,22 +186,21 @@ export class UserService {
     return true;
   }
 
-  async getFavoriteProjects(id: number): Promise<ProjectEntity[]> {
-    const user = await this.users.findOneOrFail(id, { relations: ['favoriteProjects'] });
-    return user.favoriteProjects;
-  }
-  async getFavoriteBoards(id: number): Promise<BoardEntity[]> {
-    const user = await this.users.findOneOrFail(id, { relations: ['favoriteBoards'] });
-    return user.favoriteBoards;
-  }
   async getNotifications(id: number): Promise<NotificationEntity[]> {
-    const user = await this.users
+    const { notifications } = await this.users
       .createQueryBuilder('user')
       .where('user.id = :id', { id })
+
       .leftJoinAndSelect('user.notifications', 'notifications')
+      .leftJoinAndSelect('notifications.post', 'post')
+      .leftJoinAndSelect('post.file', 'file')
+
+      .leftJoinAndSelect('notifications.initiatorUser', 'initiatorUser')
+      .leftJoinAndSelect('initiatorUser.avatar', 'initiatorUserAvatar')
+
       .orderBy('notifications.createdAt', 'DESC')
       .getOneOrFail();
-    return user.notifications;
+    return notifications;
   }
 
   async isUsernameTaken(username: string): Promise<boolean> {
@@ -219,5 +220,160 @@ export class UserService {
       }
     );
     return true;
+  }
+
+  async follow(targetID: number, currentUserID: number): Promise<void> {
+    const target = await this.users.findOneOrFail(targetID);
+    const user = await this.users.findOneOrFail(currentUserID);
+    await this.userFollowings.save({
+      user,
+      target,
+    });
+    await this.notificationsService.create({
+      type: NotificationTypes.FOLLOWED,
+      receiverUserID: targetID,
+      initiatorUserID: currentUserID,
+    });
+  }
+  async unfollow(targetID: number, userID: number): Promise<void> {
+    const following = await this.getUserFollowedEntity(targetID, userID);
+    if (following) {
+      await this.userFollowings.delete(following.id);
+      await this.notificationsService.deleteLastByInitiatorID(userID, targetID);
+    }
+  }
+  async getUserFollowedEntity(targetID: number, userID: number): Promise<FollowingEntity> {
+    return await this.userFollowings
+      .createQueryBuilder('follow')
+      .where('follow.user.id = :userID', { userID })
+      .andWhere('follow.target.id = :targetID', { targetID })
+      .getOne();
+  }
+  async getIsUserFollowed(targetID: number, userID: number): Promise<boolean> {
+    return Boolean(await this.getUserFollowedEntity(targetID, userID));
+  }
+  async getUserFollowers(userID: number): Promise<FollowingEntity[]> {
+    return await this.userFollowings
+      .createQueryBuilder('follow')
+      .leftJoinAndSelect('follow.user', 'user')
+      .andWhere('follow.target.id = :userID', { userID })
+      .getMany();
+  }
+
+  async getSuggestions(page: number, limit: number, currentUserID: number): Promise<UserSuggestion[]> {
+    const currentUserFollowings = await this.userFollowings
+      .createQueryBuilder('following')
+      .where('following.user.id = :currentUserID', { currentUserID })
+      .getRawMany();
+    const currentUserFollowingIDs = currentUserFollowings.map((f) => f.following_targetId);
+
+    // TODO: fix pagination
+    // TODO: fix when 1 user in 2 arrays
+
+    const followersThatCurrentUserDontFollowQB = this.userFollowings
+      .createQueryBuilder('following')
+      .leftJoinAndSelect('following.user', 'user')
+      .leftJoinAndSelect('user.avatar', 'avatar')
+      .orderBy('following.createdAt', 'DESC')
+      .take(Math.floor(limit / 3))
+      .skip((page - 1) * Math.floor(limit / 3))
+      .where('following.target.id = :currentUserID', { currentUserID })
+      .andWhere('following.user.id != :currentUserID', { currentUserID })
+      .andWhere('following.user.id NOT IN  (:...currentUserFollowingIDs)', {
+        currentUserFollowingIDs,
+      });
+    const followersThatCurrentUserDontFollow = currentUserFollowingIDs.length
+      ? await followersThatCurrentUserDontFollowQB.getMany()
+      : [];
+    const usersThatCurrentUserDontFollow = followersThatCurrentUserDontFollow.map((f) => {
+      return {
+        id: f.user.id,
+        color: f.user.color,
+        avatar: f.user.avatar,
+        username: f.user.username,
+        suggestion: 'Follows you',
+      };
+    });
+
+    const followedByYourFollowedQB = this.userFollowings
+      .createQueryBuilder('following')
+      .leftJoinAndSelect('following.user', 'user')
+      .leftJoinAndSelect('following.target', 'target')
+      .leftJoinAndSelect('target.avatar', 'avatar')
+      .orderBy('following.createdAt', 'DESC')
+      .take(Math.floor(limit / 3))
+      .skip((page - 1) * Math.floor(limit / 3))
+      .where('following.user.id != :currentUserID', { currentUserID })
+      .andWhere('following.target.id != :currentUserID', { currentUserID })
+      .andWhere('following.user.id IN (:...currentUserFollowingIDs)', {
+        currentUserFollowingIDs,
+      })
+      .andWhere('following.target.id NOT IN  (:...currentUserFollowingIDs)', {
+        currentUserFollowingIDs,
+      });
+    const followedByYourFollowed = currentUserFollowingIDs.length ? await followedByYourFollowedQB.getMany() : [];
+    const followedUsersByYourFollowed = followedByYourFollowed.map((f) => {
+      return {
+        id: f.target.id,
+        color: f.target.color,
+        avatar: f.target.avatar,
+        username: f.target.username,
+        suggestion: `Followed by ${f.user.username}`,
+      };
+    });
+
+    const userIDsThatCurrentUserDontFollow = usersThatCurrentUserDontFollow.map((u) => u.id);
+    const lastNewUsersQB = this.users
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.avatar', 'avatar')
+      .where('user.id != :currentUserID', { currentUserID })
+      .take(Math.floor(limit / 3))
+      .skip((page - 1) * Math.floor(limit / 3));
+    if (userIDsThatCurrentUserDontFollow.length)
+      lastNewUsersQB.andWhere('user.id NOT IN  (:...userIDsThatCurrentUserDontFollow)', {
+        userIDsThatCurrentUserDontFollow,
+      });
+    const lastNewUsers = await lastNewUsersQB.getMany();
+
+    const formattedLastNewUsers = lastNewUsers.map((u) => {
+      return {
+        id: u.id,
+        color: u.color,
+        avatar: u.avatar,
+        username: u.username,
+        suggestion: 'New to Instagram',
+      };
+    });
+    return [...formattedLastNewUsers, ...usersThatCurrentUserDontFollow, ...followedUsersByYourFollowed];
+  }
+
+  async getRecentSearch(userID: number): Promise<(UserEntity | TagEntity)[]> {
+    const user = await this.users
+      .createQueryBuilder('user')
+      .where('user.id = :id', { id: userID })
+      .leftJoinAndSelect('user.recentSearch', 'recentSearch')
+      .orderBy('recentSearch.createdAt', 'DESC')
+      .getOneOrFail();
+    return await Promise.all(
+      user.recentSearch.map(async (item) => {
+        return item.type === 'user'
+          ? { ...(await this.users.findOne(item.itemID)), recentSearchID: item.id }
+          : { ...(await this.postsService.getTagByID(item.itemID)), recentSearchID: item.id };
+      })
+    );
+  }
+  async addRecentSearch(id: number, type: 'user' | 'tag', userID: number): Promise<number> {
+    const user = await this.users.findOneOrFail(userID, { relations: ['recentSearch'] });
+    const repeatIndex = user.recentSearch.findIndex((rc) => rc.itemID === id && rc.type === type);
+    if (repeatIndex !== -1) await this.recentSearch.delete(user.recentSearch[repeatIndex].id);
+    const rc = await this.recentSearch.save({
+      itemID: id,
+      type,
+      user,
+    });
+    return rc.id;
+  }
+  async removeRecentSearch(id: number): Promise<void> {
+    await this.recentSearch.delete(id);
   }
 }

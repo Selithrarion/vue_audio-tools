@@ -1,29 +1,31 @@
 import {
+  AfterLoad,
   BeforeInsert,
   Column,
   Entity,
+  getConnection,
   Index,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
   OneToMany,
   OneToOne,
-  RelationId,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { IsEmail } from 'class-validator';
+import { Exclude } from 'class-transformer';
 
 import { BaseEntity } from '../../../common/types/base.entity';
-import { IssueEntity } from '../../issues/entity/issue.entity';
-import { ProjectEntity } from '../../projects/entity/project.entity';
-import { BoardEntity } from '../../boards/entity/board.entity';
-import { Exclude } from 'class-transformer';
-import { TeamEntity } from '../../teams/entity/team.entity';
-import { CommentEntity } from '../../issues/entity/comment.entity';
 import { PublicFileEntity } from '../../files/entity/public-file.entity';
-import stringToHslColor from '../../../common/utils/stringToHslColor';
 import { NotificationEntity } from '../../notifications/entity/notification.entity';
+import { CommentEntity } from '../../posts/entity/comment.entity';
+import { PostEntity } from '../../posts/entity/post.entity';
+
+import stringToHslColor from '../../../common/utils/stringToHslColor';
+import { ReportEntity } from '../../posts/entity/report.entity';
+import { RecentSearchEntity } from './recentSearch.entity';
+import { PostLikeEntity } from '../../posts/entity/postLike.entity';
+import { FollowingEntity } from './following.entity';
+import { PostFeedEntity } from '../../posts/entity/postFeed.entity';
+import { CommentLikeEntity } from '../../posts/entity/commentLike.entity';
 
 export interface UserGoogleData {
   email: string;
@@ -55,6 +57,14 @@ export interface UserJwtPayload {
   readonly is2FAEnabled: boolean;
 }
 
+export interface UserSuggestion {
+  id: number;
+  color: string;
+  avatar?: PublicFileEntity | null;
+  username: string;
+  suggestion: string;
+}
+
 @Entity()
 export class UserEntity extends BaseEntity {
   @Column({ length: 64 })
@@ -65,13 +75,14 @@ export class UserEntity extends BaseEntity {
   username: string;
 
   @Column({ unique: true })
-  @IsEmail()
   @Index()
+  @IsEmail()
   email: string;
 
   @Exclude()
   @Column({ nullable: true, length: 128 })
   password: string;
+
   @BeforeInsert()
   async hashPassword(): Promise<void> {
     if (this.password) this.password = await bcrypt.hash(this.password, 10);
@@ -82,13 +93,13 @@ export class UserEntity extends BaseEntity {
   }
 
   @Exclude()
-  @Column({ nullable: true })
+  @Column({ nullable: true, select: false })
   hashedRefreshToken: string;
 
   @Column({ default: false })
   isTwoFactorEnabled: boolean;
   @Exclude()
-  @Column({ nullable: true })
+  @Column({ nullable: true, select: false })
   twoFactorSecret: string;
 
   @Column({ nullable: true })
@@ -121,47 +132,52 @@ export class UserEntity extends BaseEntity {
   @JoinColumn()
   avatar: PublicFileEntity;
 
-  @OneToOne(() => PublicFileEntity, {
-    eager: true,
-    nullable: true,
-  })
-  @JoinColumn()
-  header: PublicFileEntity;
+  @Column({ length: 1024, nullable: true })
+  description: string;
+  @Column({ length: 512, nullable: true })
+  website: string;
+  @Column({ length: 64, nullable: true })
+  phone: string;
+  @Column({ length: 64, nullable: true })
+  gender: string;
 
-  @OneToMany(() => IssueEntity, (issue) => issue.assigned)
-  assignedIssues: IssueEntity[];
-  @ManyToMany(() => IssueEntity, (issue) => issue.watchers)
-  watchingIssues: IssueEntity[];
-
-  @ManyToMany(() => ProjectEntity, (project) => project.users, {
+  @OneToMany(() => PostEntity, (post) => post.author, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  @JoinTable()
-  projects: ProjectEntity[];
-  @RelationId('projects')
-  projectIDs: number[];
+  posts: PostEntity[];
+  postsNumber?: number;
 
-  @ManyToMany(() => ProjectEntity, (project) => project.users)
-  @JoinTable()
-  favoriteProjects: ProjectEntity[];
-  @RelationId('favoriteProjects')
-  favoriteProjectIDs: number[];
+  @OneToMany(() => PostFeedEntity, (pf) => pf.user, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  postFeed: PostFeedEntity[];
 
-  @ManyToMany(() => BoardEntity, (board) => board.users)
-  @JoinTable()
-  favoriteBoards: BoardEntity[];
-  @RelationId('favoriteBoards')
-  favoriteBoardIDs: number[];
+  @OneToMany(() => PostLikeEntity, (pl) => pl.user, {
+    cascade: true,
+  })
+  likedPosts: PostLikeEntity[];
 
-  @Column({ nullable: true })
-  position: string;
-  @Column({ nullable: true })
-  department: string;
-  @Column({ nullable: true })
-  organisation: string;
-  @Column({ nullable: true })
-  location: string;
+  @OneToMany(() => CommentLikeEntity, (cm) => cm.user, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  likedComments: CommentLikeEntity[];
+
+  @OneToMany(() => FollowingEntity, (f) => f.user, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  followers: FollowingEntity[];
+  followersNumber?: number;
+
+  @OneToMany(() => FollowingEntity, (f) => f.target, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  followedUsers: FollowingEntity[];
+  followedNumber?: number;
 
   @OneToMany(() => CommentEntity, (comment) => comment.author, {
     cascade: true,
@@ -170,23 +186,51 @@ export class UserEntity extends BaseEntity {
   })
   comments: CommentEntity[];
 
-  @ManyToMany(() => TeamEntity, (team) => team.users, {
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-  })
-  teams: TeamEntity[];
+  @OneToMany(() => ReportEntity, (r) => r.reporter)
+  postReports: ReportEntity[];
 
-  @ManyToOne(() => TeamEntity, (team) => team.leader, {
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-  })
-  teamsLeader: TeamEntity[];
-  @RelationId('teamsLeader')
-  teamsLeaderIDs: number[];
-
-  @OneToMany(() => NotificationEntity, (notification) => notification.user, {
+  @OneToMany(() => NotificationEntity, (n) => n.receiverUser, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   notifications: NotificationEntity[];
+
+  @OneToMany(() => RecentSearchEntity, (s) => s.user, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  recentSearch: RecentSearchEntity[];
+
+  isViewerFollowed?: boolean;
+  isViewerBlocked?: boolean;
+
+  @AfterLoad()
+  async count(): Promise<void> {
+    const connection = await getConnection();
+    const repository = connection.getRepository('UserEntity');
+
+    const { count: postsNumber } = await repository
+      .createQueryBuilder('user')
+      .leftJoin('user.posts', 'posts')
+      .leftJoin('posts.author', 'author')
+      .where('author.id = :id', { id: this.id })
+      .select('COUNT(*)', 'count')
+      .getRawOne();
+
+    const { count: followersNumber } = await repository
+      .createQueryBuilder('followers')
+      .where('followers.id = :id', { id: this.id })
+      .select('COUNT(*)', 'count')
+      .getRawOne();
+
+    const { count: followingNumber } = await repository
+      .createQueryBuilder('followedUsers')
+      .where('followedUsers.id = :id', { id: this.id })
+      .select('COUNT(*)', 'count')
+      .getRawOne();
+
+    this.postsNumber = Number(postsNumber);
+    this.followersNumber = Number(followersNumber);
+    this.followedNumber = Number(followingNumber);
+  }
 }
