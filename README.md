@@ -1,4 +1,4 @@
-# Audio cutter with Vue 3 and Nest
+# Audio tools with Vue 3 and Nest
 
 prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_instagram-clone)
 
@@ -44,6 +44,10 @@ Github actions CI pipeline
 - Change audio volume ❌
 - Change audio bitrate ❌
 - Change audio speed ❌
+- Hotkeys to stop/pause, move current time with arrows
+- Waveform ❌
+- Equalizer ❌
+- Equalizer spectrum ❌
 - Export cropped audio with updated data ❌
 #### Other
 - Google analytics
