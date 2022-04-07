@@ -1,4 +1,4 @@
-# Audio cutter with Vue 3 and Nest
+# Audio tools with Vue 3 and Nest
 
 prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_instagram-clone)
 
@@ -19,7 +19,6 @@ for a quick understanding of project structure you can look at frontend models (
 
 ### Stack
 #### Frontend
-
 1. Vue 3
 2. Vuex
 3. Typescript
@@ -28,29 +27,31 @@ for a quick understanding of project structure you can look at frontend models (
 6. other - date-fns, some lodash functions, eslint + tslint + prettier
 
 #### Backend
-
 1. Node.js (Nest.js)
 2. Typescript
 3. PostgreSQL + TypeORM
 4. AWS S3 (Amazon Simple Storage Service)
 
 #### Other
-
 Github actions CI pipeline
 
 ### App Features
-
 ❌ === not implemented yet  
 ✨ === TODO idea. it seems that it won't be implemented but there were some plans
 
-
-#### Global
-- TODO
+#### Audio
+- Cut mp3 ❌
+- Change audio volume ❌
+- Change audio bitrate ❌
+- Change audio speed ❌
+- Hotkeys to stop/pause, move current time with arrows ❌
+- Waveform ❌
+- Equalizer ❌
+- Equalizer spectrum ❌
+- Export cropped audio with updated data ❌
+#### Other
 - Google analytics
 - Sentry - error monitoring and logging for both frontend and backend
-
-#### Audio
-- TODO
 
 ### Known bugs
 - TODO
