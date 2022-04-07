@@ -170,7 +170,7 @@ export default defineComponent({
   ::v-deep .wavesurfer-region {
     background-color: #23c1ff33 !important;
     border-radius: 12px !important;
-    box-shadow: rgb(210 245 255) 0 0 32px 7px;
+    box-shadow: rgb(210 245 255) 0 0 32px 7px, #537c7aad 0 0 0 10000px;
   }
   ::v-deep .wavesurfer-handle {
     background-color: #23c1ff !important;
