@@ -34,12 +34,14 @@
     "quasar": "^2.0.0",
     "vue-i18n": "^9.2.0-beta.9",
     "vue-observe-visibility": "^1.0.0",
-    "vuex": "^4.0.1"
+    "vuex": "^4.0.1",
+    "wavesurfer.js": "^6.1.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.13.14",
     "@quasar/app": "^3.0.0",
     "@types/node": "^10.17.15",
+    "@types/wavesurfer.js": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
     "eslint": "^7.14.0",
