@@ -1,27 +1,32 @@
 <template>
-  <q-page class="row gap-4 q-px-md no-wrap">
-    <div class="feed"></div>
+  <q-page class="row gap-4 no-wrap">
+    <AudioWelcome v-if='!rawAudio' @set-audio='rawAudio = $event' @set-audio-duration='rawAudioDuration = $event'/>
+    <AudioEditor v-else :raw-audio='rawAudio' :raw-audio-duration='rawAudioDuration'/>
   </q-page>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
+
+import AudioWelcome from 'components/audio/AudioWelcome.vue';
+import AudioEditor from 'components/audio/AudioEditor.vue';
 
 export default defineComponent({
   name: 'Index',
 
+  components: {
+    AudioEditor,
+    AudioWelcome
+  },
+
   setup() {
-    return {};
+    const rawAudio = ref<File | null>(null);
+    const rawAudioDuration = ref(0)
+
+    return {
+      rawAudio,
+      rawAudioDuration
+    };
   },
 });
 </script>
-
-<style lang="scss">
-.feed {
-  display: flex;
-  flex-flow: column;
-  gap: 32px;
-  flex-grow: 1;
-  max-width: 655px;
-}
-</style>
