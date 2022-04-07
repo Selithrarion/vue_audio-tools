@@ -39,12 +39,12 @@ Github actions CI pipeline
 ❌ === not implemented yet  
 ✨ === TODO idea. it seems that it won't be implemented but there were some plans
 
-#### Global
+#### Audio
 - Cut mp3 ❌
 - Change audio volume ❌
 - Change audio bitrate ❌
 - Change audio speed ❌
-- Hotkeys to stop/pause, move current time with arrows
+- Hotkeys to stop/pause, move current time with arrows ❌
 - Waveform ❌
 - Equalizer ❌
 - Equalizer spectrum ❌
