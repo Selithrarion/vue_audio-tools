@@ -139,7 +139,7 @@ export default defineComponent({
       };
     });
     const styles = computed(() => {
-      const styles = [];
+      const styles: Record<string, string | number>[] = [];
 
       if (props.src) styles.push({ background: 'white' });
       else if (isHslOrRgbItemColor.value) styles.push({ background: props.itemColor });

@@ -7,18 +7,9 @@
     "strict": true,
     "jsx": "preserve",
     "moduleResolution": "node",
-    "types": [
-      "node",
-      "webpack-env",
-      "lodash",
-      "jest"
-    ],
-    "esModuleInterop": true
+    "types": ["node", "webpack-env", "lodash", "jest"],
+    "esModuleInterop": true,
+    "noImplicitAny": false
   },
-  "exclude": [
-    "test/cypress",
-    "/dist",
-    ".quasar",
-    "node_modules"
-  ]
+  "exclude": ["test/cypress", "/dist", ".quasar", "node_modules"]
 }

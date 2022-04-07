@@ -127,7 +127,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const computedClasses = computed(() => {
-      const classes = [];
+      const classes: string[] = [];
 
       if (props.truncate) classes.push('base-select--truncate');
       if (props.buttonStyle) classes.push('base-select--button-style');

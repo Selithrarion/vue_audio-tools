@@ -234,7 +234,7 @@ export default defineComponent({
     });
 
     const computedCardStyles = computed(() => {
-      const styles = [];
+      const styles: Record<string, string | number>[] = [];
 
       if (props.small && !props.maximized) styles.push({ width: '300px' });
       else if (props.large && !props.maximized) styles.push({ width: '900px' }, { maxWidth: '900px' });
