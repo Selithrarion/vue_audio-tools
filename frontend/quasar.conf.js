@@ -85,7 +85,7 @@ module.exports = configure(function (ctx) {
       plugins: ['Notify', 'Cookies'],
     },
 
-    animations: ['fadeIn', 'fadeOut'],
+    animations: ['fadeIn', 'fadeOut', 'zoomIn', 'zoomOut'],
 
     ssr: {
       pwa: false,
