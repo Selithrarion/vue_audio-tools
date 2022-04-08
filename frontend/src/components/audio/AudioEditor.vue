@@ -37,6 +37,8 @@
         <AudioEditorVolume :model-value="volume" label="Browser volume" @update:model-value="setVolume" />
         <AudioEditorVolume v-model="exportedVolume" label="Export volume" />
       </div>
+
+      <BaseButton class="shadow-14" label="Export" color="primary" padding="sm xl" unelevated @click="exportAudio" />
     </div>
   </div>
 </template>
@@ -48,6 +50,7 @@ import AudioEditorVolume from 'components/audio/AudioEditorVolume.vue';
 
 import WaveSurfer from 'wavesurfer.js';
 import Regions from 'wavesurfer.js/dist/plugin/wavesurfer.regions';
+import { Mp3Encoder } from 'lamejs';
 
 export default defineComponent({
   name: 'AudioEditor',
@@ -120,7 +123,55 @@ export default defineComponent({
 
     const region = ref([0, props.rawAudioDuration]);
     function updateExportRegion(updatedRegion: { start: number; end: number }) {
+      console.log(updatedRegion);
       region.value = [updatedRegion.start, updatedRegion.end];
+    }
+
+    async function exportAudio() {
+      try {
+        // TODO: fix err https://github.com/zhuker/lamejs/issues/86
+        // https://github.com/meowtec/audio-cutter/tree/master/src
+        // https://github.com/lubenard/simple-mp3-cutter/blob/master/src/cutter.js
+        // https://github.com/antoine92190/vue-advanced-chat/blob/master/src/utils/mp3-encoder.js
+        // https://codesandbox.io/s/bzcdr?file=/src/components/media-recorder/WebAudioUtils.js:1613-1623
+        const audioContext = new AudioContext();
+        const buffer = await new Response(props.rawAudio).arrayBuffer();
+
+        const decodedData = await audioContext.decodeAudioData(buffer);
+        console.log('decodedData', decodedData);
+
+        const mp3Encoder = new Mp3Encoder(decodedData.numberOfChannels, decodedData.sampleRate, 128);
+        const mp3Data: string[] = [];
+
+        console.log(mp3Encoder);
+
+        const left = new Int16Array(44100); //one second of silence (get your data from the source you have)
+        const right = new Int16Array(44100); //one second of silence (get your data from the source you have)
+        const samples = new Int16Array(44100); //one second of silence (get your data from the source you have)
+        const sampleBlockSize = 1152; //can be anything but make it a multiple of 576 to make encoders life easier
+
+        for (let i = 0; i < samples.length; i += sampleBlockSize) {
+          const leftChunk = left.subarray(i, i + sampleBlockSize);
+          const rightChunk = right.subarray(i, i + sampleBlockSize);
+          const encoded = mp3Encoder.encodeBuffer(leftChunk, rightChunk);
+          if (encoded.length > 0) {
+            mp3Data.push(encoded);
+          }
+        }
+        const mp3 = mp3Encoder.flush();
+        if (mp3.length > 0) {
+          mp3Data.push(mp3);
+        }
+
+        console.log('mp3Data', mp3Data);
+
+        const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+        console.log('blob', blob);
+        const url = URL.createObjectURL(blob);
+        console.log('MP3 URl: ', url);
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     const actions = [
@@ -140,6 +191,11 @@ export default defineComponent({
         icon: 'graphic_eq',
       },
       {
+        tooltip: 'Bitrate',
+        key: 'bitrate',
+        icon: 'grain',
+      },
+      {
         tooltip: 'Equalizer',
         key: 'equalizer',
         icon: 'equalizer',
@@ -154,6 +210,7 @@ export default defineComponent({
       setVolume,
 
       region,
+      exportAudio,
 
       actions,
       selectedAction,
