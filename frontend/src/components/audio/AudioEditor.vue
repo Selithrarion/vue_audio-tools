@@ -77,7 +77,7 @@ export default defineComponent({
       wavesurfer.value = WaveSurfer.create({
         container: '#waveform',
         waveColor: 'rgb(207,217,237)',
-        progressColor: '#0d91c5',
+        progressColor: '#60A5FA',
         normalize: true,
         // barRadius: 50,
         // barGap: 50,
@@ -167,13 +167,20 @@ export default defineComponent({
   padding: 64px 32px;
   background: #d4dded2e;
 
+  ::v-deep .waveform > wave {
+    border-radius: 12px;
+    > wave {
+      border-right-color: #ff2a6f !important;
+    }
+  }
+
   ::v-deep .wavesurfer-region {
-    background-color: #23c1ff33 !important;
+    background-color: rgba($primary, 0.2) !important;
     border-radius: 12px !important;
-    box-shadow: rgb(210 245 255) 0 0 32px 7px, #537c7aad 0 0 0 10000px;
+    box-shadow: lighten($primary, 20%) 0 0 32px 7px, #738caa7a 0 0 0 10000px;
   }
   ::v-deep .wavesurfer-handle {
-    background-color: #23c1ff !important;
+    background-color: #60a5fa !important;
     width: 16px !important;
   }
   ::v-deep .wavesurfer-handle-start {
