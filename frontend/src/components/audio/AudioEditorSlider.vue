@@ -11,6 +11,7 @@
           :max="max"
           label
           switch-label-side
+          v-bind="$attrs"
           @update:model-value="$emit('update:model-value', $event)"
         />
       </q-item-section>
@@ -24,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
   name: 'AudioEditorSlider',

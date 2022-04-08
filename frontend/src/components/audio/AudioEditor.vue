@@ -41,11 +41,15 @@
         <AudioEditorSlider
           :model-value="speed"
           label="Speed"
+          :label-value="speed / 100"
           :min="10"
-          :max="200"
+          :max="300"
           :step="10"
           @update:model-value="setSpeed"
         />
+      </div>
+      <div v-else-if="selectedAction === 'bitrate'">
+        <AudioEditorSlider v-model="bitrate" label="Export bitrate" :min="16" :max="320" />
       </div>
 
       <BaseButton class="shadow-14" label="Export" color="primary" padding="sm xl" unelevated @click="exportAudio" />
@@ -97,6 +101,10 @@ export default defineComponent({
       speed.value = v;
       wavesurfer.value?.setPlaybackRate(speed.value / 100);
     }
+
+    // TODO: set current audio bitrate and limit slider max?
+    // didn't found how to get bitrate in js, only duration, size and samplerate
+    const bitrate = ref(192);
 
     onMounted(() => {
       wavesurfer.value = WaveSurfer.create({
@@ -208,11 +216,6 @@ export default defineComponent({
         icon: 'speed',
       },
       {
-        tooltip: 'Pitch',
-        key: 'pitch',
-        icon: 'graphic_eq',
-      },
-      {
         tooltip: 'Bitrate',
         key: 'bitrate',
         icon: 'grain',
@@ -227,12 +230,15 @@ export default defineComponent({
 
     return {
       wavesurfer,
+
       volume,
       exportedVolume,
       setVolume,
 
       speed,
       setSpeed,
+
+      bitrate,
 
       region,
       exportAudio,
