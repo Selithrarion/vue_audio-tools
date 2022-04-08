@@ -164,6 +164,11 @@ export default defineComponent({
         // https://github.com/lubenard/simple-mp3-cutter/blob/master/src/cutter.js
         // https://github.com/antoine92190/vue-advanced-chat/blob/master/src/utils/mp3-encoder.js
         // https://codesandbox.io/s/bzcdr?file=/src/components/media-recorder/WebAudioUtils.js:1613-1623
+        // or use ffmpeg
+        // https://github.com/Kagami/ffmpeg.js/
+        // https://medium.com/jeremy-gottfrieds-tech-blog/javascript-tutorial-record-audio-and-encode-it-to-mp3-2eedcd466e78
+        // https://devtails.medium.com/how-to-convert-audio-from-wav-to-mp3-in-javascript-using-ffmpeg-wasm-5dcd07a11821
+        // https://www.google.ru/search?q=ffmpeg+vue&oq=ffmpeg+vue&sourceid=chrome&ie=UTF-8
         const audioContext = new AudioContext();
         const buffer = await new Response(props.rawAudio).arrayBuffer();
 
