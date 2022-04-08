@@ -33,9 +33,19 @@
         </transition>
       </BaseButton>
 
-      <div>
-        <AudioEditorVolume :model-value="volume" label="Browser volume" @update:model-value="setVolume" />
-        <AudioEditorVolume v-model="exportedVolume" label="Export volume" />
+      <div v-if="selectedAction === 'volume'">
+        <AudioEditorSliderVolume :model-value="volume" label="Browser volume" @update:model-value="setVolume" />
+        <AudioEditorSliderVolume v-model="exportedVolume" label="Export volume" />
+      </div>
+      <div v-else-if="selectedAction === 'speed'">
+        <AudioEditorSlider
+          :model-value="speed"
+          label="Speed"
+          :min="10"
+          :max="200"
+          :step="10"
+          @update:model-value="setSpeed"
+        />
       </div>
 
       <BaseButton class="shadow-14" label="Export" color="primary" padding="sm xl" unelevated @click="exportAudio" />
@@ -46,15 +56,21 @@
 <script lang="ts">
 import { defineComponent, onMounted, onBeforeUnmount, ref } from 'vue';
 
-import AudioEditorVolume from 'components/audio/AudioEditorVolume.vue';
+import AudioEditorSliderVolume from 'components/audio/AudioEditorSliderVolume.vue';
 
 import WaveSurfer from 'wavesurfer.js';
 import Regions from 'wavesurfer.js/dist/plugin/wavesurfer.regions';
 import { Mp3Encoder } from 'lamejs';
+import AudioEditorSlider from 'components/audio/AudioEditorSlider.vue';
 
 export default defineComponent({
   name: 'AudioEditor',
-  components: { AudioEditorVolume },
+
+  components: {
+    AudioEditorSlider,
+    AudioEditorSliderVolume,
+  },
+
   props: {
     rawAudio: {
       type: File,
@@ -74,6 +90,12 @@ export default defineComponent({
     function setVolume(v = 10) {
       volume.value = v;
       wavesurfer.value?.setVolume(volume.value / 100);
+    }
+
+    const speed = ref(100);
+    function setSpeed(v: number) {
+      speed.value = v;
+      wavesurfer.value?.setPlaybackRate(speed.value / 100);
     }
 
     onMounted(() => {
@@ -176,9 +198,9 @@ export default defineComponent({
 
     const actions = [
       {
-        tooltip: 'Cut',
-        key: 'cut',
-        icon: 'content_cut',
+        tooltip: 'Volume',
+        key: 'volume',
+        icon: 'volume_up',
       },
       {
         tooltip: 'Speed',
@@ -201,13 +223,16 @@ export default defineComponent({
         icon: 'equalizer',
       },
     ];
-    const selectedAction = ref('cut');
+    const selectedAction = ref('volume');
 
     return {
       wavesurfer,
       volume,
       exportedVolume,
       setVolume,
+
+      speed,
+      setSpeed,
 
       region,
       exportAudio,
