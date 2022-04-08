@@ -35,7 +35,7 @@
 
       <div>
         <AudioEditorVolume :model-value="volume" label="Browser volume" @update:model-value="setVolume" />
-        <AudioEditorVolume v-model="exportVolume" label="Export volume" />
+        <AudioEditorVolume v-model="exportedVolume" label="Export volume" />
       </div>
     </div>
   </div>
@@ -67,7 +67,7 @@ export default defineComponent({
     const wavesurfer = ref<WaveSurfer | null>(null);
 
     const volume = ref(10);
-    const exportVolume = ref(100);
+    const exportedVolume = ref(100);
     function setVolume(v = 10) {
       volume.value = v;
       wavesurfer.value?.setVolume(volume.value / 100);
@@ -88,7 +88,7 @@ export default defineComponent({
         ],
       });
       wavesurfer.value?.loadBlob(props.rawAudio);
-      setVolume()
+      setVolume();
 
       wavesurfer.value.on('ready', () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -150,7 +150,7 @@ export default defineComponent({
     return {
       wavesurfer,
       volume,
-      exportVolume,
+      exportedVolume,
       setVolume,
 
       region,
