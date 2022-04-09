@@ -41,11 +41,11 @@ Github actions CI pipeline
 
 #### Audio
 - Cut mp3 ❌
-- Change audio volume ❌
-- Change audio bitrate ❌
-- Change audio speed ❌
-- Hotkeys to stop/pause, move current time with arrows ❌
-- Waveform ❌
+- Change export and browser volume
+- Change bitrate ❌
+- Change speed
+- Hotkeys to stop/pause, move current time with arrows
+- [Waveform](https://github.com/katspaugh/wavesurfer.js)
 - Equalizer ❌
 - Equalizer spectrum ❌
 - Export cropped audio with updated data ❌
