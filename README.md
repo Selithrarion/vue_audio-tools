@@ -65,4 +65,4 @@ Github actions CI pipeline
 6. star? 🤩😊 anyway, glad to any PRs  
 
 ### Notes
-- 2-month pet-project from 1st april to the end of may. probably LOL  
+- 1-month pet-project from 1st to 31st of april. probably LOL  
