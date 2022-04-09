@@ -64,7 +64,8 @@ import AudioEditorSliderVolume from 'components/audio/AudioEditorSliderVolume.vu
 
 import WaveSurfer from 'wavesurfer.js';
 import Regions from 'wavesurfer.js/dist/plugin/wavesurfer.regions';
-import audioEncoder from 'audio-encoder';
+// import audioEncoder from 'audio-encoder';
+// import { Mp3Encoder } from 'lamejs';
 import AudioEditorSlider from 'components/audio/AudioEditorSlider.vue';
 
 export default defineComponent({
@@ -157,30 +158,30 @@ export default defineComponent({
       region.value = [updatedRegion.start, updatedRegion.end];
     }
 
-    function exportAudio() {
+    async function exportAudio() {
       try {
         // TODO: fix err https://github.com/zhuker/lamejs/issues/86
 
         const audioContext = new AudioContext();
-        // const buffer = await new Response(props.rawAudio).arrayBuffer();
+        const buffer = await new Response(props.rawAudio).arrayBuffer();
+
+        const decodedData = await audioContext.decodeAudioData(buffer);
+        console.log('decodedData', decodedData);
+
+        // const length = 44100; // one second @ 44.1KHz
+        // const audioBuffer = audioContext.createBuffer(1, length, 44100);
+        // const channelData = audioBuffer.getChannelData(0);
         //
-        // const decodedData = await audioContext.decodeAudioData(buffer);
-        // console.log('decodedData', decodedData);
-
-        const length = 44100; // one second @ 44.1KHz
-        const audioBuffer = audioContext.createBuffer(1, length, 44100);
-        const channelData = audioBuffer.getChannelData(0);
-
-        // fill some audio
-        for (let i = 0; i < length; i++) {
-          channelData[i] = Math.sin(i * 0.03);
-        }
-
-        // convert as mp3 and save file using file-saver
-        audioEncoder(audioBuffer, 128, null, (blob) => {
-          const url = URL.createObjectURL(blob);
-          console.log('MP3 URl: ', url);
-        });
+        // // fill some audio
+        // for (let i = 0; i < length; i++) {
+        //   channelData[i] = Math.sin(i * 0.03);
+        // }
+        //
+        // // convert as mp3 and save file using file-saver
+        // audioEncoder(audioBuffer, 128, null, (blob) => {
+        //   const url = URL.createObjectURL(blob);
+        //   console.log('MP3 URl: ', url);
+        // });
 
         // const mp3Encoder = new Mp3Encoder(decodedData.numberOfChannels, decodedData.sampleRate, 128);
         // const mp3Data: string[] = [];

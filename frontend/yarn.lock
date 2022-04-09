@@ -2011,13 +2011,6 @@ at-least-node@^1.0.0:
   resolved "https://registry.npmjs.org/at-least-node/-/at-least-node-1.0.0.tgz"
   integrity sha512-+q/t7Ekv1EDY2l6Gda6LLiX14rU9TV20Wa3ofeQmwPFZbOMo9DXrLbOjFaaclkXKWidIaopwAObQDqwWtGUjqg==
 
-audio-encoder@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/audio-encoder/-/audio-encoder-1.0.4.tgz#416a37a4815344277d74da23d09f660979aa3abc"
-  integrity sha512-B9SH/AqqyrrDtSY51QXZoDjFmLeDgBLi7yDKI4wv8w3uzIPTsj0WEnzUiKNLmEANEJygxTjtYUGYVOSVaNNhjw==
-  dependencies:
-    lamejs "1.2.1"
-
 autoprefixer@10.4.0:
   version "10.4.0"
   resolved "https://registry.npmjs.org/autoprefixer/-/autoprefixer-10.4.0.tgz"
@@ -4111,7 +4104,7 @@ klona@^2.0.4, klona@^2.0.5:
   resolved "https://registry.npmjs.org/klona/-/klona-2.0.5.tgz"
   integrity sha512-pJiBpiXMbt7dkzXe8Ghj/u4FfXOOa98fPW+bihOJ4SjnoijweJrNThJfd3ifXpXhREjpoF2mZVH1GfS9LV3kHQ==
 
-lamejs@1.2.1:
+lamejs@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/lamejs/-/lamejs-1.2.1.tgz#0f92d38729213f106d4a19ded20821da7e89c8e4"
   integrity sha512-s7bxvjvYthw6oPLCm5pFxvA84wUROODB8jEO2+CE1adhKgrIvVOlmMgY8zyugxGrvRaDHNJanOiS21/emty6dQ==
