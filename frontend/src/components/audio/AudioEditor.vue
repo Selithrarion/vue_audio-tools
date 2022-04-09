@@ -64,7 +64,7 @@ import AudioEditorSliderVolume from 'components/audio/AudioEditorSliderVolume.vu
 
 import WaveSurfer from 'wavesurfer.js';
 import Regions from 'wavesurfer.js/dist/plugin/wavesurfer.regions';
-import { Mp3Encoder } from 'lamejs';
+import audioEncoder from 'audio-encoder';
 import AudioEditorSlider from 'components/audio/AudioEditorSlider.vue';
 
 export default defineComponent({
@@ -157,53 +157,60 @@ export default defineComponent({
       region.value = [updatedRegion.start, updatedRegion.end];
     }
 
-    async function exportAudio() {
+    function exportAudio() {
       try {
         // TODO: fix err https://github.com/zhuker/lamejs/issues/86
-        // https://github.com/meowtec/audio-cutter/tree/master/src
-        // https://github.com/lubenard/simple-mp3-cutter/blob/master/src/cutter.js
-        // https://github.com/antoine92190/vue-advanced-chat/blob/master/src/utils/mp3-encoder.js
-        // https://codesandbox.io/s/bzcdr?file=/src/components/media-recorder/WebAudioUtils.js:1613-1623
-        // or use ffmpeg
-        // https://github.com/Kagami/ffmpeg.js/
-        // https://medium.com/jeremy-gottfrieds-tech-blog/javascript-tutorial-record-audio-and-encode-it-to-mp3-2eedcd466e78
-        // https://devtails.medium.com/how-to-convert-audio-from-wav-to-mp3-in-javascript-using-ffmpeg-wasm-5dcd07a11821
-        // https://www.google.ru/search?q=ffmpeg+vue&oq=ffmpeg+vue&sourceid=chrome&ie=UTF-8
+
         const audioContext = new AudioContext();
-        const buffer = await new Response(props.rawAudio).arrayBuffer();
+        // const buffer = await new Response(props.rawAudio).arrayBuffer();
+        //
+        // const decodedData = await audioContext.decodeAudioData(buffer);
+        // console.log('decodedData', decodedData);
 
-        const decodedData = await audioContext.decodeAudioData(buffer);
-        console.log('decodedData', decodedData);
+        const length = 44100; // one second @ 44.1KHz
+        const audioBuffer = audioContext.createBuffer(1, length, 44100);
+        const channelData = audioBuffer.getChannelData(0);
 
-        const mp3Encoder = new Mp3Encoder(decodedData.numberOfChannels, decodedData.sampleRate, 128);
-        const mp3Data: string[] = [];
-
-        console.log(mp3Encoder);
-
-        const left = new Int16Array(44100); //one second of silence (get your data from the source you have)
-        const right = new Int16Array(44100); //one second of silence (get your data from the source you have)
-        const samples = new Int16Array(44100); //one second of silence (get your data from the source you have)
-        const sampleBlockSize = 1152; //can be anything but make it a multiple of 576 to make encoders life easier
-
-        for (let i = 0; i < samples.length; i += sampleBlockSize) {
-          const leftChunk = left.subarray(i, i + sampleBlockSize);
-          const rightChunk = right.subarray(i, i + sampleBlockSize);
-          const encoded = mp3Encoder.encodeBuffer(leftChunk, rightChunk);
-          if (encoded.length > 0) {
-            mp3Data.push(encoded);
-          }
-        }
-        const mp3 = mp3Encoder.flush();
-        if (mp3.length > 0) {
-          mp3Data.push(mp3);
+        // fill some audio
+        for (let i = 0; i < length; i++) {
+          channelData[i] = Math.sin(i * 0.03);
         }
 
-        console.log('mp3Data', mp3Data);
+        // convert as mp3 and save file using file-saver
+        audioEncoder(audioBuffer, 128, null, (blob) => {
+          const url = URL.createObjectURL(blob);
+          console.log('MP3 URl: ', url);
+        });
 
-        const blob = new Blob(mp3Data, { type: 'audio/mp3' });
-        console.log('blob', blob);
-        const url = URL.createObjectURL(blob);
-        console.log('MP3 URl: ', url);
+        // const mp3Encoder = new Mp3Encoder(decodedData.numberOfChannels, decodedData.sampleRate, 128);
+        // const mp3Data: string[] = [];
+        //
+        // console.log(mp3Encoder);
+        //
+        // const left = new Int16Array(44100); //one second of silence (get your data from the source you have)
+        // const right = new Int16Array(44100); //one second of silence (get your data from the source you have)
+        // const samples = new Int16Array(44100); //one second of silence (get your data from the source you have)
+        // const sampleBlockSize = 1152; //can be anything but make it a multiple of 576 to make encoders life easier
+        //
+        // for (let i = 0; i < samples.length; i += sampleBlockSize) {
+        //   const leftChunk = left.subarray(i, i + sampleBlockSize);
+        //   const rightChunk = right.subarray(i, i + sampleBlockSize);
+        //   const encoded = mp3Encoder.encodeBuffer(leftChunk, rightChunk);
+        //   if (encoded.length > 0) {
+        //     mp3Data.push(encoded);
+        //   }
+        // }
+        // const mp3 = mp3Encoder.flush();
+        // if (mp3.length > 0) {
+        //   mp3Data.push(mp3);
+        // }
+        //
+        // console.log('mp3Data', mp3Data);
+        //
+        // const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+        // console.log('blob', blob);
+        // const url = URL.createObjectURL(blob);
+        // console.log('MP3 URl: ', url);
       } catch (e) {
         console.error(e);
       }
