@@ -4,7 +4,6 @@ prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_ins
 
 ### Content
 - [Video](#video)
-- [Project structure](#project-structure)
 - [Stack](#stack)
 - [App Features](#app-features)
 - [Known bugs](#known-bugs)
@@ -13,9 +12,6 @@ prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_ins
 
 ### Video
 TODO
-
-### Project structure
-for a quick understanding of project structure you can look at frontend models (frontend/src/models) or backend modules and their entities (backend/src/modules)
 
 ### Stack
 #### Frontend
