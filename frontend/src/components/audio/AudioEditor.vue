@@ -1,5 +1,5 @@
 <template>
-  <div class="column w-full">
+  <div class="column w-full no-wrap">
     <div class="action-tabs flex-center gap-4 shadow-1">
       <BaseButton
         v-for="action in actions"
@@ -18,7 +18,7 @@
       <div id="waveform" class="waveform" />
     </div>
 
-    <div class="bottom-section flex-center column gap-8 q-py-xl shadow-1">
+    <div class="bottom-section column items-center gap-16 q-py-xl shadow-1">
       <BaseButton
         class="shadow-14"
         color="primary"
@@ -51,14 +51,35 @@
       <div v-else-if="selectedAction === 'bitrate'">
         <AudioEditorSlider v-model="bitrate" label="Export bitrate" :min="16" :max="320" />
       </div>
-
+      <div v-else-if="selectedAction === 'equalizer'" class="row gap-4">
+        <div class="row gap-2">
+          <AudioEditorSlider
+            v-for="(item, index) in wavesurferFilters"
+            :key="item.frequency.value"
+            :model-value="equalizer[index].value"
+            :label="item.frequency.value"
+            :min="-12"
+            :max="12"
+            vertical
+            reverse
+            @update:model-value="updateEqualizer($event, index)"
+          />
+        </div>
+        <BaseButton
+          class="self-center"
+          style="margin-bottom: 28px"
+          icon="restart_alt"
+          tooltip="Reset EQ"
+          @click="resetEqualizer"
+        />
+      </div>
       <BaseButton class="shadow-14" label="Export" color="primary" padding="sm xl" unelevated @click="exportAudio" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onBeforeUnmount, ref } from 'vue';
+import { defineComponent, onBeforeUnmount, onMounted, ref } from 'vue';
 
 import AudioEditorSliderVolume from 'components/audio/AudioEditorSliderVolume.vue';
 
@@ -67,6 +88,13 @@ import Regions from 'wavesurfer.js/dist/plugin/wavesurfer.regions';
 // import audioEncoder from 'audio-encoder';
 // import { Mp3Encoder } from 'lamejs';
 import AudioEditorSlider from 'components/audio/AudioEditorSlider.vue';
+import { WaveSurferBackend } from 'wavesurfer.js/types/backend';
+
+interface EqItem {
+  f: number;
+  type: BiquadFilterType;
+  value: number;
+}
 
 export default defineComponent({
   name: 'AudioEditor',
@@ -107,6 +135,69 @@ export default defineComponent({
     // didn't found how to get bitrate in js, only duration, size and samplerate
     const bitrate = ref(192);
 
+    const equalizer = ref<EqItem[]>([
+      {
+        f: 32,
+        type: 'lowshelf',
+        value: 0,
+      },
+      {
+        f: 64,
+        type: 'peaking',
+        value: 0,
+      },
+      {
+        f: 125,
+        type: 'peaking',
+        value: 0,
+      },
+      {
+        f: 250,
+        type: 'peaking',
+        value: 0,
+      },
+      {
+        f: 500,
+        type: 'peaking',
+        value: 0,
+      },
+      {
+        f: 1000,
+        type: 'peaking',
+        value: 0,
+      },
+      {
+        f: 2000,
+        type: 'peaking',
+        value: 0,
+      },
+      {
+        f: 4000,
+        type: 'peaking',
+        value: 0,
+      },
+      {
+        f: 8000,
+        type: 'peaking',
+        value: 0,
+      },
+      {
+        f: 16000,
+        type: 'highshelf',
+        value: 0,
+      },
+    ]);
+    const wavesurferFilters = ref<BiquadFilterNode[] | null>(null);
+    function updateEqualizer(v: number, index: number) {
+      if (!wavesurferFilters.value) return;
+      wavesurferFilters.value[index].gain.value = v;
+      equalizer.value[index].value = v;
+    }
+    function resetEqualizer() {
+      wavesurferFilters.value?.forEach((f) => (f.gain.value = 0));
+      equalizer.value?.forEach((f) => (f.value = 0));
+    }
+
     onMounted(() => {
       wavesurfer.value = WaveSurfer.create({
         container: '#waveform',
@@ -130,8 +221,50 @@ export default defineComponent({
           end: props.rawAudioDuration,
           loop: true,
         });
+        wavesurferFilters.value = equalizer.value.map((band) => {
+          const { ac } = wavesurfer.value?.backend as WaveSurferBackend & { ac: AudioContext };
+          let filter = ac.createBiquadFilter();
+          filter.type = band.type;
+          filter.gain.value = 0;
+          filter.Q.value = 1;
+          filter.frequency.value = band.f;
+          return filter;
+        });
+
+        wavesurfer.value?.backend.setFilters(wavesurferFilters.value);
+
+        // Bind filters to vertical range sliders
+        // let container = document.querySelector('#equalizer');
+        // filters.forEach((filter) => {
+        //   let input = document.createElement('input');
+        //   Object.assign(input, {
+        //     type: 'range',
+        //     min: -40,
+        //     max: 40,
+        //     value: 0,
+        //     title: filter.frequency.value,
+        //   });
+        //   input.style.display = 'inline-block';
+        //   input.setAttribute('orient', 'vertical');
+        //   wavesurfer.value?.util.style(input, {
+        //     webkitAppearance: 'slider-vertical',
+        //     width: '50px',
+        //     height: '150px',
+        //   });
+        //   container?.appendChild(input);
+        //
+        //   let onChange = function (e) {
+        //     filter.gain.value = ~~e.target.value;
+        //   };
+        //
+        //   input.addEventListener('input', onChange);
+        //   input.addEventListener('change', onChange);
+        // });
+
+        // For debugging
+        if (wavesurfer.value) wavesurfer.value.filters = wavesurferFilters.value;
       });
-      wavesurfer.value.on('region-update-end', updateExportRegion);
+      wavesurfer.value?.on('region-update-end', updateExportRegion);
 
       addEventListener('keydown', handleKeyPress);
     });
@@ -253,6 +386,11 @@ export default defineComponent({
 
       bitrate,
 
+      equalizer,
+      wavesurferFilters,
+      updateEqualizer,
+      resetEqualizer,
+
       region,
       exportAudio,
 
@@ -299,6 +437,7 @@ export default defineComponent({
 .bottom-section {
   padding-left: 32px;
   padding-right: 32px;
+  height: 100%;
 }
 
 .play-icon {
