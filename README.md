@@ -1,10 +1,9 @@
-# Audio tools with Vue 3 and Nest
+# Audio tools with Vue 3
 
 prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_instagram-clone)
 
 ### Content
 - [Video](#video)
-- [Project structure](#project-structure)
 - [Stack](#stack)
 - [App Features](#app-features)
 - [Known bugs](#known-bugs)
@@ -14,23 +13,13 @@ prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_ins
 ### Video
 TODO
 
-### Project structure
-for a quick understanding of project structure you can look at frontend models (frontend/src/models) or backend modules and their entities (backend/src/modules)
-
 ### Stack
 #### Frontend
 1. Vue 3
-2. Vuex
-3. Typescript
-4. Quasar
-5. Vue i18n
-6. other - date-fns, some lodash functions, eslint + tslint + prettier
-
-#### Backend
-1. Node.js (Nest.js)
 2. Typescript
-3. PostgreSQL + TypeORM
-4. AWS S3 (Amazon Simple Storage Service)
+3. Quasar
+4. [Wavesurfer](https://github.com/katspaugh/wavesurfer.js)
+5. other - date-fns, some lodash functions, eslint + tslint + prettier
 
 #### Other
 Github actions CI pipeline
@@ -40,13 +29,13 @@ Github actions CI pipeline
 ✨ === TODO idea. it seems that it won't be implemented but there were some plans
 
 #### Audio
-- Cut mp3 ❌
-- Change audio volume ❌
-- Change audio bitrate ❌
-- Change audio speed ❌
-- Hotkeys to stop/pause, move current time with arrows ❌
-- Waveform ❌
-- Equalizer ❌
+- Select region to export
+- Change export and browser volume
+- Change bitrate ❌
+- Change speed
+- Hotkeys to stop/pause, move current time with arrows
+- Waveform
+- Equalizer
 - Equalizer spectrum ❌
 - Export cropped audio with updated data ❌
 #### Other
@@ -58,11 +47,8 @@ Github actions CI pipeline
 
 ### Installation  
 1. Clone project  
-2. Terminal 1 - "docker compose up"  
-3. Terminal 2 - "yarn global add @quasar/cli" and "cd .\frontend\" and "quasar dev"  
-4. Terminal 3 - "cd .\backend\" and "yarn start:dev" 
-5. Don't forget to create new server (Object => Create => Server) and then database (instagram) in pgadmin (localhost:8082). small tip: in server connection field enter: host.docker.internal
-6. star? 🤩😊 anyway, glad to any PRs  
+2. "yarn global add @quasar/cli" and "cd .\frontend\" and "quasar dev"
+3. star? 🤩😊 anyway, glad to any PRs  
 
 ### Notes
-- 2-month pet-project from 1st april to the end of may. probably LOL  
+- 1-month pet-project from 1st to 31st of april. probably LOL  
