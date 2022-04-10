@@ -232,38 +232,8 @@ export default defineComponent({
         });
 
         wavesurfer.value?.backend.setFilters(wavesurferFilters.value);
-
-        // Bind filters to vertical range sliders
-        // let container = document.querySelector('#equalizer');
-        // filters.forEach((filter) => {
-        //   let input = document.createElement('input');
-        //   Object.assign(input, {
-        //     type: 'range',
-        //     min: -40,
-        //     max: 40,
-        //     value: 0,
-        //     title: filter.frequency.value,
-        //   });
-        //   input.style.display = 'inline-block';
-        //   input.setAttribute('orient', 'vertical');
-        //   wavesurfer.value?.util.style(input, {
-        //     webkitAppearance: 'slider-vertical',
-        //     width: '50px',
-        //     height: '150px',
-        //   });
-        //   container?.appendChild(input);
-        //
-        //   let onChange = function (e) {
-        //     filter.gain.value = ~~e.target.value;
-        //   };
-        //
-        //   input.addEventListener('input', onChange);
-        //   input.addEventListener('change', onChange);
-        // });
-
-        // For debugging
-        if (wavesurfer.value) wavesurfer.value.filters = wavesurferFilters.value;
       });
+
       wavesurfer.value?.on('region-update-end', updateExportRegion);
 
       addEventListener('keydown', handleKeyPress);
