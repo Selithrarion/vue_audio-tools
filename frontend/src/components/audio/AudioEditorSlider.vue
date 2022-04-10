@@ -1,5 +1,19 @@
 <template>
-  <div class="flex items-center gap-4">
+  <div v-if="vertical" class="flex-center column gap-2">
+    <q-slider
+      :model-value="modelValue"
+      :min="min"
+      :max="max"
+      label
+      switch-label-side
+      vertical
+      v-bind="$attrs"
+      @update:model-value="$emit('update:model-value', $event)"
+    />
+    <div v-if="label" class="text-caption">{{ label }}</div>
+  </div>
+
+  <div v-else class="flex items-center gap-4">
     <div v-if="label" class="flex-center-end" style="width: 120px">
       {{ label }}
     </div>
@@ -44,9 +58,11 @@ export default defineComponent({
       default: 0,
     },
     label: {
-      type: String,
+      type: [Number, String],
       default: null,
     },
+
+    vertical: Boolean,
   },
 
   emits: ['update:model-value'],
