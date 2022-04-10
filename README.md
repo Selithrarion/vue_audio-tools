@@ -20,17 +20,10 @@ for a quick understanding of project structure you can look at frontend models (
 ### Stack
 #### Frontend
 1. Vue 3
-2. Vuex
-3. Typescript
-4. Quasar
-5. Vue i18n
-6. other - date-fns, some lodash functions, eslint + tslint + prettier
-
-#### Backend
-1. Node.js (Nest.js)
 2. Typescript
-3. PostgreSQL + TypeORM
-4. AWS S3 (Amazon Simple Storage Service)
+3. Quasar
+4. [Wavesurfer](https://github.com/katspaugh/wavesurfer.js)
+5. other - date-fns, some lodash functions, eslint + tslint + prettier
 
 #### Other
 Github actions CI pipeline
@@ -45,7 +38,7 @@ Github actions CI pipeline
 - Change bitrate ❌
 - Change speed
 - Hotkeys to stop/pause, move current time with arrows
-- [Waveform](https://github.com/katspaugh/wavesurfer.js)
+- Waveform
 - Equalizer
 - Equalizer spectrum ❌
 - Export cropped audio with updated data ❌
