@@ -1,4 +1,4 @@
-# Audio tools with Vue 3 and Nest
+# Audio tools with Vue 3
 
 prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_instagram-clone)
 
