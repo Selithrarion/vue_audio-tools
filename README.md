@@ -40,13 +40,13 @@ Github actions CI pipeline
 ✨ === TODO idea. it seems that it won't be implemented but there were some plans
 
 #### Audio
-- Cut mp3 ❌
+- Select region to export
 - Change export and browser volume
 - Change bitrate ❌
 - Change speed
 - Hotkeys to stop/pause, move current time with arrows
 - [Waveform](https://github.com/katspaugh/wavesurfer.js)
-- Equalizer ❌
+- Equalizer
 - Equalizer spectrum ❌
 - Export cropped audio with updated data ❌
 #### Other
