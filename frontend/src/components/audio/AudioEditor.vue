@@ -16,6 +16,12 @@
 
     <div class="waveform-wrapper">
       <div id="waveform" class="waveform" />
+
+      <div class="waveform__time flex-center text-primary text-body1 text-weight-medium">
+        {{ formatTime(region[0]) }}
+        —
+        {{ formatTime(region[1]) }}
+      </div>
     </div>
 
     <div class="bottom-section column items-center gap-16 q-py-xl shadow-1">
@@ -117,6 +123,16 @@ export default defineComponent({
 
   setup(props) {
     const wavesurfer = ref<WaveSurfer | null>(null);
+    function formatTime(v: number) {
+      const minutes = (v / 60).toFixed(0);
+      const formattedMinutes = Number(minutes) < 10 ? `0${minutes}` : minutes;
+
+      const seconds = (v % 60).toFixed(0);
+      const formattedSeconds = Number(seconds) < 10 ? `0${seconds}` : seconds;
+
+      const ms = String(v.toFixed(1)).split('.')[1];
+      return `${formattedMinutes}:${formattedSeconds}.${ms}`;
+    }
 
     const volume = ref(10);
     const exportedVolume = ref(100);
@@ -346,6 +362,7 @@ export default defineComponent({
 
     return {
       wavesurfer,
+      formatTime,
 
       volume,
       exportedVolume,
@@ -373,8 +390,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .waveform-wrapper {
-  padding: 64px 32px;
+  padding: 64px 32px 0 32px;
   background: #d4dded2e;
+
+  .waveform__time {
+    padding: 20px 0;
+  }
 
   ::v-deep .waveform > wave {
     border-radius: 12px;
