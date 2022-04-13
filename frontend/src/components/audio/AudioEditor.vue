@@ -257,8 +257,8 @@ export default defineComponent({
 
     const region = ref([0, props.rawAudioDuration]);
     function updateExportRegion(updatedRegion: { start: number; end: number }) {
-      console.log(updatedRegion);
       region.value = [updatedRegion.start, updatedRegion.end];
+      wavesurfer.value?.play(updatedRegion.start, updatedRegion.end);
     }
 
     async function exportAudio() {
