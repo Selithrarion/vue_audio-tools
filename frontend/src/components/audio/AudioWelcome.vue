@@ -3,7 +3,11 @@
     <div class="text-h3 text-weight-bold">Audio Tools</div>
     <div class="text-subtitle2 q-mb-lg">Cut track, change volume, change bitrate online</div>
 
-    <CommonUploader accept="audio/*" @set-file="$emit('set-audio', $event)" @set-file-duration="$emit('set-audio-duration', $event)">
+    <CommonUploader
+      accept="audio/*"
+      @set-file="$emit('set-audio', $event)"
+      @set-file-duration="$emit('set-audio-duration', $event)"
+    >
       <BaseButton style="width: 250px" color="primary" label="Open file" size="18px" unelevated />
     </CommonUploader>
   </div>

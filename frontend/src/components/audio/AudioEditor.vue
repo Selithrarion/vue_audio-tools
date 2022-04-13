@@ -30,6 +30,7 @@
         color="primary"
         size="20px"
         padding="sm xl"
+        tabindex="0"
         unelevated
         @click="wavesurfer.playPause()"
       >
@@ -252,6 +253,7 @@ export default defineComponent({
 
       wavesurfer.value?.on('region-update-end', updateExportRegion);
 
+      // TODO: event didn't handle sometimes cuz we have focus on button
       addEventListener('keydown', handleKeyPress);
     });
     onBeforeUnmount(() => {
