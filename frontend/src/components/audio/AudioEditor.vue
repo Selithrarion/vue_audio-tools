@@ -39,11 +39,11 @@
         </transition>
       </BaseButton>
 
-      <div v-if="selectedAction === 'volume'">
+      <div v-show="selectedAction === 'volume'">
         <AudioEditorSliderVolume :model-value="volume" label="Browser volume" @update:model-value="setVolume" />
         <AudioEditorSliderVolume v-model="exportedVolume" label="Export volume" />
       </div>
-      <div v-else-if="selectedAction === 'speed'">
+      <div v-show="selectedAction === 'speed'">
         <AudioEditorSlider
           :model-value="speed"
           label="Speed"
@@ -54,10 +54,10 @@
           @update:model-value="setSpeed"
         />
       </div>
-      <div v-else-if="selectedAction === 'bitrate'">
+      <div v-show="selectedAction === 'bitrate'">
         <AudioEditorSlider v-model="bitrate" label="Export bitrate" :min="16" :max="320" />
       </div>
-      <div v-else-if="selectedAction === 'equalizer'" class="row gap-4">
+      <div v-show="selectedAction === 'equalizer'" class="row gap-4">
         <div class="row gap-2">
           <AudioEditorSlider
             v-for="(item, index) in wavesurferFilters"
@@ -273,8 +273,8 @@ export default defineComponent({
 
     const region = ref([0, props.rawAudioDuration]);
     function updateExportRegion(updatedRegion: { start: number; end: number }) {
+      if (updatedRegion.start !== region.value[0]) wavesurfer.value?.play(updatedRegion.start, updatedRegion.end);
       region.value = [updatedRegion.start, updatedRegion.end];
-      wavesurfer.value?.play(updatedRegion.start, updatedRegion.end);
     }
 
     async function exportAudio() {
