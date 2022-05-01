@@ -52,5 +52,5 @@ TODO
 3. star? 🤩😊 anyway, glad to any PRs  
 
 ### Notes
-- 1-month pet-project from 1st to 31st of april. probably LOL
+- 1-month pet-project from 1st to 31st of april. probably LOL  
 upd: haha.. 
