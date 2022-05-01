@@ -33,7 +33,12 @@ TODO
 - Waveform
 - Equalizer
 - Equalizer spectrum ❌
-- Export cropped audio with updated data ❌
+- Detect BPM ❌
+- Change detected BPM when we're changing song speed ❌
+- Detect and visualize beats ✨
+- Snap to nearest beat when selecting export region ✨
+- Export cropped audio to mp3 format with selected settings ❌
+- Exprot to wav ✨
 #### Other
 - Google analytics
 - Sentry - error monitoring and logging for both frontend and backend
@@ -47,4 +52,5 @@ TODO
 3. star? 🤩😊 anyway, glad to any PRs  
 
 ### Notes
-- 1-month pet-project from 1st to 31st of april. probably LOL  
+- 1-month pet-project from 1st to 31st of april. probably LOL
+upd: haha.. 
