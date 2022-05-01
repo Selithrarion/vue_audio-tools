@@ -38,7 +38,7 @@ TODO
 - Detect and visualize beats ✨
 - Snap to nearest beat when selecting export region ✨
 - Export cropped audio to mp3 format with selected settings ❌
-- Exprot to wav ✨
+- Export to wav ❌
 #### Other
 - Google analytics
 - Sentry - error monitoring and logging for both frontend and backend
