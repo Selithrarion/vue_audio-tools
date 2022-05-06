@@ -48,6 +48,9 @@
         <AudioEditorSliderVolume v-model="exportedVolume" label="Export volume" />
       </div>
       <div v-show="selectedAction === 'speed'">
+        <div class="text-subtitle2 text-center">
+          Average BPM ~{{ musicInfo?.tempo ? Math.round(musicInfo?.tempo * (speed / 100)) : 'Undefined' }}
+        </div>
         <AudioEditorSlider
           :model-value="speed"
           label="Speed"
@@ -108,8 +111,13 @@ import WaveSurfer from 'wavesurfer.js';
 import Regions from 'wavesurfer.js/dist/plugin/wavesurfer.regions';
 // import audioEncoder from 'audio-encoder';
 // import { Mp3Encoder } from 'lamejs';
+import MusicTempo from 'music-tempo';
+
 import AudioEditorSlider from 'components/audio/AudioEditorSlider.vue';
 import { WaveSurferBackend } from 'wavesurfer.js/types/backend';
+import { EventTargetWithResult } from 'src/models/common/eventTargetWithResult.model';
+import { MusicTempoData } from 'app/src';
+import useDialog from 'src/composables/common/useDialog';
 
 interface EqItem {
   f: number;
@@ -139,17 +147,48 @@ export default defineComponent({
   emits: ['close'],
 
   setup(props) {
+    const dialog = useDialog();
+
     const wavesurfer = ref<WaveSurfer | null>(null);
     function formatTime(v: number) {
-      const minutes = (v / 60).toFixed(0);
+      const minutes = Math.floor(v / 60);
       const formattedMinutes = Number(minutes) < 10 ? `0${minutes}` : minutes;
 
-      const seconds = (v % 60).toFixed(0);
+      const seconds = Math.floor(v % 60);
       const formattedSeconds = Number(seconds) < 10 ? `0${seconds}` : seconds;
 
       const ms = String(v.toFixed(1)).split('.')[1];
       return `${formattedMinutes}:${formattedSeconds}.${ms}`;
     }
+
+    function decodeAndSetMusicInfo() {
+      const context = new AudioContext();
+      const reader = new FileReader();
+      reader.onload = async ($event) => {
+        const target = $event.target as EventTargetWithResult;
+        const result = target.result as unknown as ArrayBuffer;
+        await context.decodeAudioData(result, (buffer: AudioBuffer) => {
+          let audioData: number[] | Float32Array = [];
+          // average of the two channels
+          if (buffer.numberOfChannels == 2) {
+            let channel1Data = buffer.getChannelData(0);
+            let channel2Data = buffer.getChannelData(1);
+            let length = channel1Data.length;
+            for (let i = 0; i < length; i++) {
+              audioData[i] = (channel1Data[i] + channel2Data[i]) / 2;
+            }
+          } else {
+            audioData = buffer.getChannelData(0);
+          }
+          // TODO
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          musicInfo.value = new MusicTempo(audioData) as MusicTempoData;
+        });
+      };
+      reader.readAsArrayBuffer(props.rawAudio);
+    }
+
+    const musicInfo = ref<MusicTempoData | null>(null);
 
     const volume = ref(10);
     const exportedVolume = ref(100);
@@ -271,6 +310,8 @@ export default defineComponent({
 
       // TODO: event don't handle sometimes cuz we have focus on button
       addEventListener('keydown', handleKeyPress);
+
+      decodeAndSetMusicInfo();
     });
     onBeforeUnmount(() => {
       removeEventListener('keydown', handleKeyPress);
@@ -388,6 +429,7 @@ export default defineComponent({
 
       wavesurfer,
       formatTime,
+      musicInfo,
 
       volume,
       exportedVolume,
@@ -437,8 +479,16 @@ export default defineComponent({
     box-shadow: lighten($primary, 20%) 0 0 32px 7px, #738caa7a 0 0 0 10000px;
   }
   ::v-deep .wavesurfer-handle {
-    background-color: #60a5fa !important;
+    background-color: darken($primary, 5%) !important;
     width: 16px !important;
+    cursor: grab !important;
+    &:hover {
+      background-color: darken($primary, 7%) !important;
+    }
+    &:active {
+      cursor: grabbing !important;
+      background-color: darken($primary, 10%) !important;
+    }
   }
   ::v-deep .wavesurfer-handle-start {
     border-radius: 12px 0 0 12px !important;
