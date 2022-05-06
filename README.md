@@ -18,7 +18,8 @@ TODO
 2. Typescript
 3. Quasar
 4. [Wavesurfer](https://github.com/katspaugh/wavesurfer.js)
-5. other - date-fns, some lodash functions, eslint + tslint + prettier
+5. [MusicTempo](https://github.com/killercrush/music-tempo)
+6. other - date-fns, some lodash functions, eslint + tslint + prettier
 
 ### App Features
 ❌ === not implemented yet  
@@ -33,8 +34,8 @@ TODO
 - Waveform
 - Equalizer
 - Equalizer spectrum ❌
-- Detect BPM ❌
-- Change detected BPM when we're changing song speed ❌
+- Detect BPM with music-tempo
+- Change detected BPM when we're changing song speed  
 - Detect and visualize beats ✨
 - Snap to nearest beat when selecting export region ✨
 - Export cropped audio to mp3 format with selected settings ❌
