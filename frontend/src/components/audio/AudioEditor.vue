@@ -12,6 +12,9 @@
       >
         <q-icon :name="action.icon" size="18px" />
       </BaseButton>
+      <BaseButton color="blue-grey-7" tooltip="Close" flat @click="showCloseAudioDialog">
+        <q-icon name="close" size="18px" />
+      </BaseButton>
     </div>
 
     <div class="waveform-wrapper">
@@ -82,6 +85,17 @@
       </div>
       <BaseButton class="shadow-14" label="Export" color="primary" padding="sm xl" unelevated @click="exportAudio" />
     </div>
+
+    <BaseDialog
+      type="delete"
+      title="Close current audio"
+      confirm-text="Confirm"
+      :model-value="dialog.openedName.value === 'closeConfirm'"
+      @close="dialog.close"
+      @confirm="$emit('close')"
+    >
+      Are you sure you want to close this file?
+    </BaseDialog>
   </div>
 </template>
 
@@ -121,6 +135,8 @@ export default defineComponent({
       default: null,
     },
   },
+
+  emits: ['close'],
 
   setup(props) {
     const wavesurfer = ref<WaveSurfer | null>(null);
@@ -253,7 +269,7 @@ export default defineComponent({
 
       wavesurfer.value?.on('region-update-end', updateExportRegion);
 
-      // TODO: event didn't handle sometimes cuz we have focus on button
+      // TODO: event don't handle sometimes cuz we have focus on button
       addEventListener('keydown', handleKeyPress);
     });
     onBeforeUnmount(() => {
@@ -362,7 +378,14 @@ export default defineComponent({
     ];
     const selectedAction = ref('volume');
 
+    function showCloseAudioDialog() {
+      wavesurfer.value?.pause();
+      dialog.open('closeConfirm');
+    }
+
     return {
+      dialog,
+
       wavesurfer,
       formatTime,
 
@@ -385,6 +408,8 @@ export default defineComponent({
 
       actions,
       selectedAction,
+
+      showCloseAudioDialog,
     };
   },
 });

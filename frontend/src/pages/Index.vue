@@ -1,7 +1,7 @@
 <template>
   <q-page class="row gap-4 no-wrap">
-    <AudioWelcome v-if='!rawAudio' @set-audio='rawAudio = $event' @set-audio-duration='rawAudioDuration = $event'/>
-    <AudioEditor v-else :raw-audio='rawAudio' :raw-audio-duration='rawAudioDuration'/>
+    <AudioWelcome v-if="!rawAudio" @set-audio="rawAudio = $event" @set-audio-duration="rawAudioDuration = $event" />
+    <AudioEditor v-else :raw-audio="rawAudio" :raw-audio-duration="rawAudioDuration" @close="close" />
   </q-page>
 </template>
 
@@ -16,16 +16,23 @@ export default defineComponent({
 
   components: {
     AudioEditor,
-    AudioWelcome
+    AudioWelcome,
   },
 
   setup() {
     const rawAudio = ref<File | null>(null);
-    const rawAudioDuration = ref(0)
+    const rawAudioDuration = ref(0);
+
+    function close() {
+      rawAudio.value = null;
+      rawAudioDuration.value = 0;
+    }
 
     return {
       rawAudio,
-      rawAudioDuration
+      rawAudioDuration,
+
+      close,
     };
   },
 });
