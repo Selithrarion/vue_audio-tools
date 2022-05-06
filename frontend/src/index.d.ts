@@ -16,6 +16,29 @@ declare module 'lamejs' {
     flush(): string;
   }
 }
+declare module 'music-tempo' {
+  class MusicTempo {
+    constructor(v: number[] | Float32Array);
+    tempo: string;
+    tempoList: number[];
+    peaks: number[];
+    spectralFlux: number[];
+    events: number[];
+    beats: number[];
+    beatInterval: number;
+  }
+
+  export = MusicTempo;
+}
+export interface MusicTempoData {
+  tempo: string;
+  tempoList: number[];
+  peaks: number[];
+  spectralFlux: number[];
+  events: number[];
+  beats: number[];
+  beatInterval: number;
+}
 //
 // declare module 'audio-encoder' {
 //   type progressCallback = () => void;
