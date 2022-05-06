@@ -14,15 +14,11 @@ prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_ins
 TODO
 
 ### Stack
-#### Frontend
 1. Vue 3
 2. Typescript
 3. Quasar
 4. [Wavesurfer](https://github.com/katspaugh/wavesurfer.js)
 5. other - date-fns, some lodash functions, eslint + tslint + prettier
-
-#### Other
-Github actions CI pipeline
 
 ### App Features
 ❌ === not implemented yet  
@@ -37,7 +33,12 @@ Github actions CI pipeline
 - Waveform
 - Equalizer
 - Equalizer spectrum ❌
-- Export cropped audio with updated data ❌
+- Detect BPM ❌
+- Change detected BPM when we're changing song speed ❌
+- Detect and visualize beats ✨
+- Snap to nearest beat when selecting export region ✨
+- Export cropped audio to mp3 format with selected settings ❌
+- Export to wav ❌
 #### Other
 - Google analytics
 - Sentry - error monitoring and logging for both frontend and backend
@@ -52,3 +53,4 @@ Github actions CI pipeline
 
 ### Notes
 - 1-month pet-project from 1st to 31st of april. probably LOL  
+upd: haha.. 
