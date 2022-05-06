@@ -1,5 +1,5 @@
 <template>
-  <div class="column items-center w-full gap-4 q-pt-xl">
+  <div class="column items-center w-full gap-4 q-pt-xl q-mt-xl">
     <div class="text-h3 text-weight-bold">Audio Tools</div>
     <div class="text-subtitle2 q-mb-lg">Cut track, change volume, change bitrate online</div>
 
