@@ -30,18 +30,18 @@ https://user-images.githubusercontent.com/59411497/168537104-10047b92-c337-441e-
 #### Audio
 - Select region to export
 - Change export and browser volume
-- Change bitrate ❌
+- Change bitrate ✨
 - Change speed
 - Hotkeys to stop/pause, move current time with arrows
 - Waveform
 - Equalizer
-- Equalizer spectrum ❌
+- Equalizer spectrum ✨
 - Detect BPM with music-tempo
 - Change detected BPM when we're changing song speed  
 - Detect and visualize beats ✨
 - Snap to nearest beat when selecting export region ✨
-- Export cropped audio to mp3 format with selected settings ❌
-- Export to wav ❌
+- Export cropped audio to mp3 format with selected settings ✨
+- Export to wav ✨
 #### Other
 - Google analytics
 - Sentry - error monitoring and logging for both frontend and backend
