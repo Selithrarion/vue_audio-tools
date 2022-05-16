@@ -11,14 +11,17 @@ prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_ins
 - [Notes](#notes)
 
 ### Video
-TODO
+![browser_4C5nJukf4Q](https://user-images.githubusercontent.com/59411497/168537844-8eea7c09-3cf1-48db-8230-9e4ae230624a.png)  
+  
+https://user-images.githubusercontent.com/59411497/168537104-10047b92-c337-441e-abaf-6c40c0316c78.mp4
 
 ### Stack
 1. Vue 3
 2. Typescript
 3. Quasar
 4. [Wavesurfer](https://github.com/katspaugh/wavesurfer.js)
-5. other - date-fns, some lodash functions, eslint + tslint + prettier
+5. [MusicTempo](https://github.com/killercrush/music-tempo)
+6. other - date-fns, some lodash functions, eslint + tslint + prettier
 
 ### App Features
 ❌ === not implemented yet  
@@ -27,18 +30,18 @@ TODO
 #### Audio
 - Select region to export
 - Change export and browser volume
-- Change bitrate ❌
+- Change bitrate ✨
 - Change speed
 - Hotkeys to stop/pause, move current time with arrows
 - Waveform
 - Equalizer
-- Equalizer spectrum ❌
-- Detect BPM ❌
-- Change detected BPM when we're changing song speed ❌
+- Equalizer spectrum ✨
+- Detect BPM with music-tempo
+- Change detected BPM when we're changing song speed  
 - Detect and visualize beats ✨
 - Snap to nearest beat when selecting export region ✨
-- Export cropped audio to mp3 format with selected settings ❌
-- Export to wav ❌
+- Export cropped audio to mp3 format with selected settings ✨
+- Export to wav ✨
 #### Other
 - Google analytics
 - Sentry - error monitoring and logging for both frontend and backend
