@@ -8,7 +8,7 @@
         :color="selectedAction === action.key ? 'primary' : 'blue-grey-7'"
         :tooltip="action.tooltip"
         :flat="selectedAction !== action.key"
-        @click="selectedAction = action.key"
+        @click="selectAction(action.key)"
       >
         <q-icon :name="action.icon" size="18px" />
       </BaseButton>
@@ -90,6 +90,17 @@
     </div>
 
     <BaseDialog
+      title="Finding song BPM"
+      confirm-text="Confirm"
+      confirm-classes="full-width"
+      :confirm-loading="isTempoLoading"
+      :model-value="dialog.openedName.value === 'findBPM'"
+      hide-close-button
+      hide-close-icon
+    >
+      Please wait 5-20 seconds
+    </BaseDialog>
+    <BaseDialog
       type="delete"
       title="Close current audio"
       confirm-text="Confirm"
@@ -162,6 +173,8 @@ export default defineComponent({
     }
 
     function decodeAndSetMusicInfo() {
+      isTempoLoading.value = true;
+
       const context = new AudioContext();
       const reader = new FileReader();
       reader.onload = async ($event) => {
@@ -180,14 +193,20 @@ export default defineComponent({
           } else {
             audioData = buffer.getChannelData(0);
           }
-          // TODO
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          musicInfo.value = new MusicTempo(audioData) as MusicTempoData;
+
+          try {
+            // TODO
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            musicInfo.value = new MusicTempo(audioData) as MusicTempoData;
+          } finally {
+            isTempoLoading.value = false;
+            dialog.close();
+          }
         });
       };
       reader.readAsArrayBuffer(props.rawAudio);
     }
-
+    const isTempoLoading = ref(false);
     const musicInfo = ref<MusicTempoData | null>(null);
 
     const volume = ref(10);
@@ -310,8 +329,6 @@ export default defineComponent({
 
       // TODO: event don't handle sometimes cuz we have focus on button
       addEventListener('keydown', handleKeyPress);
-
-      decodeAndSetMusicInfo();
     });
     onBeforeUnmount(() => {
       removeEventListener('keydown', handleKeyPress);
@@ -417,6 +434,14 @@ export default defineComponent({
         icon: 'equalizer',
       },
     ];
+    function selectAction(key: string) {
+      selectedAction.value = key;
+      if (key === 'speed') {
+        wavesurfer.value?.pause();
+        dialog.open('findBPM');
+        decodeAndSetMusicInfo();
+      }
+    }
     const selectedAction = ref('volume');
 
     function showCloseAudioDialog() {
@@ -429,6 +454,7 @@ export default defineComponent({
 
       wavesurfer,
       formatTime,
+      isTempoLoading,
       musicInfo,
 
       volume,
@@ -449,6 +475,7 @@ export default defineComponent({
       exportAudio,
 
       actions,
+      selectAction,
       selectedAction,
 
       showCloseAudioDialog,
