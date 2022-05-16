@@ -11,6 +11,8 @@ prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_ins
 - [Notes](#notes)
 
 ### Video
+![browser_4C5nJukf4Q](https://user-images.githubusercontent.com/59411497/168537844-8eea7c09-3cf1-48db-8230-9e4ae230624a.png)  
+  
 https://user-images.githubusercontent.com/59411497/168537104-10047b92-c337-441e-abaf-6c40c0316c78.mp4
 
 ### Stack
