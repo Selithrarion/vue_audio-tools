@@ -11,7 +11,7 @@ prev project - [instagram clone](https://github.com/Selithrarion/quasar-nest_ins
 - [Notes](#notes)
 
 ### Video
-TODO
+https://user-images.githubusercontent.com/59411497/168537104-10047b92-c337-441e-abaf-6c40c0316c78.mp4
 
 ### Stack
 1. Vue 3
