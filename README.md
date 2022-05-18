@@ -40,7 +40,7 @@ https://user-images.githubusercontent.com/59411497/168537104-10047b92-c337-441e-
 - Change detected BPM when we're changing song speed  
 - Detect and visualize beats ✨
 - Snap to nearest beat when selecting export region ✨
-- Export cropped audio to mp3 format with selected settings ✨
+- Export cropped audio to mp3 format with selected settings. [lamejs issue](https://github.com/zhuker/lamejs/issues/89) ❌
 - Export to wav ✨
 #### Other
 - Google analytics
